@@ -1,0 +1,34 @@
+<!-- Launch file principal para lanzar una simulación con Stage + MoveBse -->
+
+<launch>    
+    <node pkg="mrpt_local_obstacles" type="mrpt_local_obstacles_node" name="mrpt_local_obstacles_node" output="screen">
+		<param name="source_topics_2dscan" value="laser_scan"/>
+		<param name="show_gui" value="false"/>
+    </node>
+
+    ### ROBOT SIMULATION ###
+    <param name="use_sim_time" value="true" />
+    <include file="$(find tfg_reactive_pkg)/launch/simbot_stage.launch" >
+        <arg name="world_file" value="-d $(find mrpt_reactivenav)/maps/MAPIRlab_furniture.world" />
+        <arg name="disable_odometry" value="false" />
+    </include>      
+    
+       
+    ### URDF model "r2d2" ###
+    <include file="$(find tfg_reactive_pkg)/launch/simbot_urdf.launch" />
+    <node pkg="shape_publisher" type="shape_publisher" name="shape_publisher" output="screen" launch-prefix="xterm -e">
+	<rosparam file="$(find shape_publisher)/shape_file/giraff.yaml" command="load" />
+    </node>
+    
+    ### NAVIGATION ###
+    <include file="$(find tfg_reactive_pkg)/launch/simbot_map_server.launch">
+        <arg name="map_file" value="$(find tfg_reactive_pkg)/maps/MAPIRlab_furniture.yaml" />
+    </include>
+    <include file="$(find mrpt_reactivenav)/launch/simbot_move_base.launch" />
+    <include file="$(find tfg_reactive_pkg)/launch/simbot_fake_loc.launch" />
+  
+    
+    ### RVIZ ###
+    <node name="rviz_player" pkg="rviz" type="rviz" args="-d $(find mrpt_reactivenav)/cfg/rvizco.rviz"/>
+
+</launch>

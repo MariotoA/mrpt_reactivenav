@@ -1,0 +1,33 @@
+<!-- 
+  Launch file for the MOVE_BASE node which handles costmaps and trajectory planification (global,local)
+  It publishes cmd_vel commands to the robot base
+-->
+
+<launch>
+  <arg name="launch_prefix" default="" />
+  <arg name="global_planner_plugin" default="navfn/NavfnROS" />
+  <arg name="local_planner_plugin" default="testlib::MyNavigator"/>
+  <!--<remap from="reactive_nav_goal" to="/move_base_simple/goal" />-->
+
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" launch-prefix="$(arg launch_prefix)" output="screen">
+  
+	<!-- Set type of reactive navigator (2D or 3D) -->
+		<param name="nav_type" value="2D"/> 
+
+		<!-- *Important*: This external config file holds the most important navigation settings -->
+		<param name="base_local_planner" value="$(arg local_planner_plugin)"/>
+		<param name="cfg_file_reactive" value="$(find mrpt_reactivenav)/tutorial/reactive2d_config3.ini"/>
+
+		<param name="base_global_planner" value="$(arg global_planner_plugin)"/>
+		## Planners
+    		<rosparam file="$(find mrpt_reactivenav)/move_base_conf/simbot_global_planner_params.yaml" command="load" />
+    		
+    		## Costmaps
+    		<rosparam file="$(find mrpt_reactivenav)/move_base_conf/simbot_costmap_global_params.yaml" command="load" />
+    		<rosparam file="$(find mrpt_reactivenav)/move_base_conf/simbot_costmap_common_params.yaml" command="load" />    
+    		<rosparam file="$(find mrpt_reactivenav)/move_base_conf/simbot_costmap_common_params.yaml" command="load" ns="global_costmap" />
+    		<rosparam file="$(find mrpt_reactivenav)/move_base_conf/simbot_costmap_common_params.yaml" command="load" ns="global_costmap/obstacles" />
+    
+  </node>
+  
+</launch>

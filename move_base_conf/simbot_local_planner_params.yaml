@@ -1,0 +1,6 @@
+###############################################################################################
+# Base_local_planner parameters - Trajectory generator based on costmaps
+#
+# The base_local_planner package provides a controller that drives a mobile base in the plane. 
+###############################################################################################
+

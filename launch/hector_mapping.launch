@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+
+<launch>
+  <node pkg="hector_mapping" type="hector_mapping" name="hector_mapping" output="screen">
+    
+    <!-- Frame names -->
+    <param name="map_frame" value="map" />
+    <param name="base_frame" value="base_footprint" />
+    <param name="odom_frame" value="odom" />
+    <param name="scan_topic" value="laser1"/>
+    </node>
+</launch>
