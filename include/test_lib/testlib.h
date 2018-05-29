@@ -29,7 +29,9 @@ namespace testlib // this namespace will be changed.
 			ReactiveNavNode *reactive;
 			ros::NodeHandle m_nh;
 			ros::Publisher goal_pub;
+			ros::Subscriber pose_sub;
 			std::vector<geometry_msgs::PoseStamped> g_plan;
+			geometry_msgs::PoseStamped robot_pose_;
 		public:
 			/**
 			* @brief  Default constructor for the ros wrapper
@@ -67,6 +69,9 @@ namespace testlib // this namespace will be changed.
 			* @param costmap_ros The cost map to use for assigning costs to local plans
  			*/
 			void initialize(std::string name, tf::TransformListener* tf, costmap_2d::Costmap2DROS* costmap_ros) override;
+
+
+			void poseCallback(geometry_msgs::PoseStamped robotPose);
 
       
 	};

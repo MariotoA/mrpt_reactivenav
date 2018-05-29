@@ -37,6 +37,15 @@ namespace testlib
 	bool MyNavigator::computeVelocityCommands(geometry_msgs::Twist& cmd_vel)
 	{
 		//TODO
+		// We're gonna ignore cmd_vel and send the goal to mrpt's reactive navigation engine.
+		if (!g_plan.empty()) 
+		{
+			geometry_msgs::PoseStamped goal=g_plan[g_plan.size()/2];
+			ROS_INFO("MyNavigator::computeVelocityCommands :%f,%f,%f",
+			 goal.pose.position.x,goal.pose.position.y,goal.pose.position.z);
+			goal_pub.publish(goal);
+			
+		}
 		return true;
 	};
 
@@ -51,17 +60,8 @@ namespace testlib
 		 
 	bool MyNavigator::setPlan(const std::vector<geometry_msgs::PoseStamped>& plan) 
 	{
-		// TODO
 		
-		/*if (!plan.empty()) 
-		{
-			geometry_msgs::PoseStamped goal=plan[plan.size()/4];
-			ROS_INFO("MyNavigator::setPlan :%f,%f,%f",
-			 goal.pose.position.x,goal.pose.position.y,goal.pose.position.z);
-			goal_pub.publish(goal);
-			
-		}*/
-		if (! ros::isInitialized()) {
+		if (!ros::isInitialized()) {
       			ROS_ERROR("[MyNavigator::setPlan] This planner has not been initialized, please call initialize() before using this planner");
       			return false;
 		}
@@ -69,6 +69,7 @@ namespace testlib
 		g_plan = plan;
 		return true;
 	};
+
 	void MyNavigator::initialize(std::string name, tf::TransformListener* tf, costmap_2d::Costmap2DROS* costmap_ros) 
 	{
 		// TODO
@@ -81,8 +82,15 @@ namespace testlib
 		ROS_INFO("testlib::MyNavigator: INITIALISING FROM METHOD MyNavigator::initialize\n");
 		reactive = new ReactiveNavNode(0,a);
 		goal_pub = m_nh.advertise<geometry_msgs::PoseStamped>("/reactive_nav_goal",1);
+		pose_sub = m_nh.subscribe<geometry_msgs::PoseStamped>("/amcl_pose",1,
+			&MyNavigator::poseCallback, this);
 		
 	};
+
+	void MyNavigator::poseCallback(geometry_msgs::PoseStamped robot_pose) 
+	{
+		robot_pose_ = robot_pose;
+	}
 
 
 };
