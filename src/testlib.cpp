@@ -6,6 +6,10 @@
 #include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
 
+// This is needed to publish the plans (global and local)
+// base_local_planner::publishPlan(plan,publisher);
+#include <base_local_planner/goal_functions.h>
+
 namespace testlib 
 {
 
@@ -49,14 +53,20 @@ namespace testlib
 	{
 		// TODO
 		
-		if (!plan.empty()) 
+		/*if (!plan.empty()) 
 		{
 			geometry_msgs::PoseStamped goal=plan[plan.size()/4];
 			ROS_INFO("MyNavigator::setPlan :%f,%f,%f",
 			 goal.pose.position.x,goal.pose.position.y,goal.pose.position.z);
 			goal_pub.publish(goal);
 			
+		}*/
+		if (! ros::isInitialized()) {
+      			ROS_ERROR("[MyNavigator::setPlan] This planner has not been initialized, please call initialize() before using this planner");
+      			return false;
 		}
+		g_plan.clear();
+		g_plan = plan;
 		return true;
 	};
 	void MyNavigator::initialize(std::string name, tf::TransformListener* tf, costmap_2d::Costmap2DROS* costmap_ros) 

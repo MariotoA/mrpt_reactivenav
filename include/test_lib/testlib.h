@@ -29,6 +29,7 @@ namespace testlib // this namespace will be changed.
 			ReactiveNavNode *reactive;
 			ros::NodeHandle m_nh;
 			ros::Publisher goal_pub;
+			std::vector<geometry_msgs::PoseStamped> g_plan;
 		public:
 			/**
 			* @brief  Default constructor for the ros wrapper
