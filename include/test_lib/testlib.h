@@ -1,7 +1,8 @@
 #ifndef TESTLIB__TESTLIB_H_
 #define TESTLIB__TESTLIB_H_
 
-#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/Pose.h>
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <geometry_msgs/Twist.h>
 #include <costmap_2d/costmap_2d_ros.h>
 #include <tf/transform_listener.h>
@@ -26,12 +27,17 @@ namespace testlib // this namespace will be changed.
 	class MyNavigator : public nav_core::BaseLocalPlanner 
 	{
 		private:
-			ReactiveNavNode *reactive;
+			ReactiveNavNode *m_reactive;
 			ros::NodeHandle m_nh;
-			ros::Publisher goal_pub;
-			ros::Subscriber pose_sub;
-			std::vector<geometry_msgs::PoseStamped> g_plan;
-			geometry_msgs::PoseStamped robot_pose_;
+			ros::Publisher m_goal_pub;
+			ros::Subscriber m_pose_sub;
+
+			// The global plan sended by move_base.
+			std::vector<geometry_msgs::PoseStamped> m_g_plan;
+			// Robot pose. Used to check if waypoint is reached.
+			geometry_msgs::Pose m_robot_pose_;
+			// Constant to access global path.
+			const int WAYPOINT_INDEX = 300; // If it is lower it does not work for me,
 		public:
 			/**
 			* @brief  Default constructor for the ros wrapper
@@ -71,7 +77,7 @@ namespace testlib // this namespace will be changed.
 			void initialize(std::string name, tf::TransformListener* tf, costmap_2d::Costmap2DROS* costmap_ros) override;
 
 
-			void poseCallback(geometry_msgs::PoseStamped robotPose);
+			void poseCallback(geometry_msgs::PoseWithCovarianceStamped robotPose);
 
       
 	};

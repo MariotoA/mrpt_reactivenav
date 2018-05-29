@@ -388,6 +388,10 @@ class ReactiveNavNode
 		CAbstractNavigator::TargetInfo target_info;
 		target_info.target_coords.x = target.x;
 		target_info.target_coords.y = target.y;
+		// Added to test
+		target_info.target_coords.phi = target.phi;
+
+		//
 		target_info.targetAllowedDistance = m_target_allowed_distance;
 		target_info.targetIsRelative = false;
 
