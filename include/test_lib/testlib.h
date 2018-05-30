@@ -29,15 +29,17 @@ namespace testlib // this namespace will be changed.
 		private:
 			ReactiveNavNode *m_reactive;
 			ros::NodeHandle m_nh;
+			ros::NodeHandle m_localnh{"~"}; // this way it initializes non const static attributes.
 			ros::Publisher m_goal_pub;
 			ros::Subscriber m_pose_sub;
-
 			// The global plan sended by move_base.
 			std::vector<geometry_msgs::PoseStamped> m_g_plan;
 			// Robot pose. Used to check if waypoint is reached.
 			geometry_msgs::Pose m_robot_pose_;
 			// Constant to access global path.
-			const int WAYPOINT_INDEX = 300; // If it is lower it does not work for me,
+			const int WAYPOINT_INDEX = 300; // If it is lower it does not work for me.
+			
+			double m_target_allowed_distance;
 		public:
 			/**
 			* @brief  Default constructor for the ros wrapper

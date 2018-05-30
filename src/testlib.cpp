@@ -19,12 +19,12 @@ namespace testlib
 
 	MyNavigator::~MyNavigator() 
 	{
-		
 	};
 
 	MyNavigator::MyNavigator(std::string name, tf::TransformListener* tf, costmap_2d::Costmap2DROS* costmap_ros) 
 	{
 		//MyNavigator::initialize(name,tf,costmap_ros);	
+
 	};
 
 	MyNavigator::MyNavigator(int argc, char **args)
@@ -84,6 +84,10 @@ namespace testlib
 		m_goal_pub = m_nh.advertise<geometry_msgs::PoseStamped>("/reactive_nav_goal",1);
 		m_pose_sub = m_nh.subscribe<geometry_msgs::PoseWithCovarianceStamped>("/amcl_pose",1,
 			&MyNavigator::poseCallback, this);
+		m_target_allowed_distance = 0.4;
+		m_localnh.param(
+			"target_allowed_distance", m_target_allowed_distance,
+			m_target_allowed_distance);
 		
 	};
 
