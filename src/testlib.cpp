@@ -37,7 +37,7 @@ namespace testlib
 	{
 		//TODO
 		// We're gonna ignore cmd_vel and send the goal to mrpt's reactive navigation engine.
-		if (!m_g_plan.empty()) 
+		if (!m_g_plan.empty() && isWaypointReached()) 
 		{
 			int ind = m_g_plan.size() < WAYPOINT_INDEX ? m_g_plan.size() - 1 : WAYPOINT_INDEX;
 			geometry_msgs::PoseStamped goal=m_g_plan[ind];

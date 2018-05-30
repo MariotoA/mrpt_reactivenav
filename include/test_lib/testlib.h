@@ -78,6 +78,7 @@ namespace testlib // this namespace will be changed.
 
 
 			void poseCallback(geometry_msgs::PoseWithCovarianceStamped robotPose);
+			bool isWaypointReached();
 
       
 	};
