@@ -297,13 +297,6 @@ class ReactiveNavNode
 		m_localn.param(
 			"target_allowed_distance", m_target_allowed_distance,
 			m_target_allowed_distance);
-
-
-		//TODO
-		ROS_INFO("\n\nNAVIGATION DISTANCE \n%f\n\n",m_target_allowed_distance);
-		//
-
-
 		m_localn.param("nav_period", m_nav_period, m_nav_period);
 		m_localn.param(
 			"frameid_reference", m_frameid_reference, m_frameid_reference);
