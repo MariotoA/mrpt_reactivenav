@@ -35,11 +35,16 @@ namespace testlib // this namespace will be changed.
 			// The global plan sended by move_base.
 			std::vector<geometry_msgs::PoseStamped> m_g_plan;
 			// Robot pose. Used to check if waypoint is reached.
-			geometry_msgs::Pose m_robot_pose_;
+			geometry_msgs::PoseStamped m_robot_pose_;
+			// Current waypoint.
+			geometry_msgs::PoseStamped m_waypoint;
 			// Constant to access global path.
 			const int WAYPOINT_INDEX = 300; // If it is lower it does not work for me.
 			
 			double m_target_allowed_distance;
+			bool m_robot_pose_initialized;
+			bool m_waypoint_initialized;
+			bool m_is_last_waypoint;
 		public:
 			/**
 			* @brief  Default constructor for the ros wrapper
@@ -81,6 +86,7 @@ namespace testlib // this namespace will be changed.
 
 			void poseCallback(geometry_msgs::PoseWithCovarianceStamped robotPose);
 			bool isWaypointReached();
+			bool isNextWaypointNeeded();
 
       
 	};

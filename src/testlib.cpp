@@ -4,7 +4,7 @@
 #include <nav_core/base_local_planner.h>
 #include <mrpt_bridge/pose.h>
 #include <ros/ros.h>
-
+#include <cmath>
 // This is needed to publish the plans (global and local)
 // base_local_planner::publishPlan(plan,publisher);
 #include <base_local_planner/goal_functions.h>
@@ -37,13 +37,16 @@ namespace testlib
 	{
 		//TODO
 		// We're gonna ignore cmd_vel and send the goal to mrpt's reactive navigation engine.
-		if (!m_g_plan.empty() && isWaypointReached()) 
+		// Trouble when user cancels navigation.
+		if (!m_g_plan.empty() && isNextWaypointNeeded()) 
 		{
-			int ind = m_g_plan.size() < WAYPOINT_INDEX ? m_g_plan.size() - 1 : WAYPOINT_INDEX;
-			geometry_msgs::PoseStamped goal=m_g_plan[ind];
-			ROS_INFO("MyNavigator::computeVelocityCommands :%f,%f,%f",
-			 goal.pose.position.x,goal.pose.position.y,goal.pose.position.z);
-			m_goal_pub.publish(goal);
+			m_is_last_waypoint = m_g_plan.size() < WAYPOINT_INDEX;
+			int ind = m_is_last_waypoint ? m_g_plan.size() - 1 : WAYPOINT_INDEX;
+			m_waypoint=m_g_plan[ind];
+			ROS_INFO("\n\nMyNavigator::sending goal to reactive navigator: Pose[x:%f,y:%f,z:%f]",
+			 m_waypoint.pose.position.x,m_waypoint.pose.position.y,m_waypoint.pose.position.z);
+			m_goal_pub.publish(m_waypoint);
+			m_waypoint_initialized = true;
 			
 		}
 		return true;
@@ -55,7 +58,11 @@ namespace testlib
 		//bool CWaypointsNavigator::checkHasReachedTarget 	( 	const double  	targetDist	) 	const
 		// not protected, will need to find another way.
 		// TODO
-		return false;
+		bool end = m_is_last_waypoint && isWaypointReached();
+		if (end)
+			m_robot_pose_initialized = m_waypoint_initialized = m_is_last_waypoint = false;
+		// Go back to initial state.
+		return end;
 	};
 		 
 	bool MyNavigator::setPlan(const std::vector<geometry_msgs::PoseStamped>& plan) 
@@ -88,15 +95,47 @@ namespace testlib
 		m_localnh.param(
 			"target_allowed_distance", m_target_allowed_distance,
 			m_target_allowed_distance);
+		m_robot_pose_initialized = false;
+		m_waypoint_initialized = false;
+		m_is_last_waypoint = false;
 		
 	};
 
 	void MyNavigator::poseCallback(geometry_msgs::PoseWithCovarianceStamped robot_pose) 
 	{
-		m_robot_pose_ = robot_pose.pose.pose;
+		m_robot_pose_.pose = robot_pose.pose.pose;
+		m_robot_pose_.header = robot_pose.header;
+		m_robot_pose_initialized = true;
 	}
+	
+	bool MyNavigator::isWaypointReached()
+	{
+		if (!ros::isInitialized()) {
+      			ROS_ERROR("[MyNavigator::isWaypointReached] This planner has not been initialized, please call initialize() before using this planner");
+      			return false;
+		}
 
-
+		if (!m_robot_pose_initialized) {
+      			ROS_ERROR("[MyNavigator::isWaypointReached] This planner has not received robot pose yet.");
+      			return false;
+		}
+		double x=m_robot_pose_.pose.position.x-m_waypoint.pose.position.x;
+		double y=m_robot_pose_.pose.position.y-m_waypoint.pose.position.y;
+		bool res = sqrt(x*x + y*y) <= m_target_allowed_distance;
+		if (res)
+		{
+			ROS_INFO("\n\n\n[MyNavigator::isWaypointReached] Waypoint reached.\n\n");	
+		} else 
+		{
+			ROS_INFO("[MyNavigator::isWaypointReached] Waypoint not reached yet.");	
+		}
+		return res;
+	}
+	
+	bool MyNavigator::isNextWaypointNeeded()
+	{
+		return !m_waypoint_initialized || isWaypointReached();
+	}
 };
 
 
