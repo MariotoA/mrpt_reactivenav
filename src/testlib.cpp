@@ -49,7 +49,7 @@ namespace testlib
 			 m_waypoint.pose.position.x,m_waypoint.pose.position.y,m_waypoint.pose.position.z);
 			m_goal_pub.publish(m_waypoint);
 			m_waypoint_initialized = true;
-			m_navigation_begins=m_plan_set_for_new_nav = false;
+			m_plan_set_for_new_nav = false;
 		}
 		
 		return true;
@@ -78,6 +78,7 @@ namespace testlib
 		m_g_plan.clear();
 		m_g_plan = plan;
 		m_plan_set_for_new_nav = m_navigation_begins;
+		m_navigation_begins = false;
 		return true;
 	};
 
@@ -142,7 +143,8 @@ namespace testlib
 	bool MyNavigator::isNextWaypointNeeded()
 	{
 		//
-		return m_plan_set_for_new_nav || !m_waypoint_initialized || isWaypointReached();
+		return (m_plan_set_for_new_nav&&!m_navigation_begins) 
+			|| !m_waypoint_initialized || isWaypointReached();
 	}
 	
 	void MyNavigator::goalMoveBaseCallback(const geometry_msgs::PoseStampedConstPtr& goal) 
