@@ -304,6 +304,9 @@ class ReactiveNavNode
 		m_localn.param(
 			"topic_robot_shape", m_sub_topic_robot_shape,
 			m_sub_topic_robot_shape);
+		m_localn.param(
+			"topic_relative_nav_goal", m_pub_topic_reactive_nav_goal,
+			m_pub_topic_reactive_nav_goal);
 		m_localn.param("save_nav_log", m_save_nav_log, m_save_nav_log);
 
 		ROS_ASSERT(m_nav_period > 0);

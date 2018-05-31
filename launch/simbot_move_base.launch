@@ -1,6 +1,7 @@
 <!-- 
   Launch file for the MOVE_BASE node which handles costmaps and trajectory planification (global,local)
   It publishes cmd_vel commands to the robot base
+  Note that this uses mrpt's mrpt_reactivenav for local trajectory
 -->
 
 <launch>
@@ -15,7 +16,7 @@
 
 		# This sends the distance to the target used by mrpt_reactivenav
 		<param name="target_allowed_distance" value="0.5"/>
-
+		<param name="topic_relative_nav_goal" value="reactive_nav_goal"/>
 		# *Important*: This external config file holds the most important navigation settings
 		<param name="base_local_planner" value="$(arg local_planner_plugin)"/>
 

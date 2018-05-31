@@ -32,9 +32,10 @@ namespace testlib // this namespace will be changed.
 			ros::NodeHandle m_localnh{"~"}; // this way it initializes non const static attributes.
 			ros::Publisher m_goal_pub;
 			ros::Subscriber m_pose_sub;
+			ros::Subscriber m_goal_move_base_sub;
 			// The global plan sended by move_base.
 			std::vector<geometry_msgs::PoseStamped> m_g_plan;
-			// Robot pose. Used to check if waypoint is reached.
+			// Robot pose. To check if waypoint is reached.
 			geometry_msgs::PoseStamped m_robot_pose_;
 			// Current waypoint.
 			geometry_msgs::PoseStamped m_waypoint;
@@ -45,6 +46,7 @@ namespace testlib // this namespace will be changed.
 			bool m_robot_pose_initialized;
 			bool m_waypoint_initialized;
 			bool m_is_last_waypoint;
+			bool m_navigation_begins,m_plan_set_for_new_nav;
 		public:
 			/**
 			* @brief  Default constructor for the ros wrapper
@@ -87,6 +89,7 @@ namespace testlib // this namespace will be changed.
 			void poseCallback(geometry_msgs::PoseWithCovarianceStamped robotPose);
 			bool isWaypointReached();
 			bool isNextWaypointNeeded();
+			void goalMoveBaseCallback(const geometry_msgs::PoseStampedConstPtr& goal);
 
       
 	};
