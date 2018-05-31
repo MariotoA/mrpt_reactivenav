@@ -49,7 +49,7 @@ namespace testlib
 			 m_waypoint.pose.position.x,m_waypoint.pose.position.y,m_waypoint.pose.position.z);
 			m_goal_pub.publish(m_waypoint);
 			m_waypoint_initialized = true;
-			m_plan_set_for_new_nav = false;
+			m_plan_set_for_new_nav = !m_navigation_begins;
 		}
 		
 		return true;
