@@ -40,8 +40,6 @@ namespace testlib
 		// Trouble when user cancels navigation.
 		if (!m_g_plan.empty() && isNextWaypointNeeded()) 
 		{
-			if (m_navigation_begins)
-				ROS_INFO("\n\n\nQUE PASA \n\n\n\n");
 			m_is_last_waypoint = m_g_plan.size() < WAYPOINT_INDEX;
 			int ind = m_is_last_waypoint ? m_g_plan.size() - 1 : WAYPOINT_INDEX;
 			m_waypoint=m_g_plan[ind];
@@ -49,7 +47,6 @@ namespace testlib
 			 m_waypoint.pose.position.x,m_waypoint.pose.position.y,m_waypoint.pose.position.z);
 			m_goal_pub.publish(m_waypoint);
 			m_waypoint_initialized = true;
-			m_plan_set_for_new_nav = !m_navigation_begins;
 		}
 		
 		return true;
@@ -71,14 +68,20 @@ namespace testlib
 	bool MyNavigator::setPlan(const std::vector<geometry_msgs::PoseStamped>& plan) 
 	{
 		
-		if (!ros::isInitialized()) {
+		if (!ros::isInitialized()) 
+		{
       			ROS_ERROR("[MyNavigator::setPlan] This planner has not been initialized, please call initialize() before using this planner");
       			return false;
 		}
+
+		// Before storing next plan, last goal is stored. It could be that goal was not last pose of path for all globalplanners
+		
+		// Checks if it is first initialization. We suppose is at least 1 in size when goal is sent.
+		m_new_navigation = !m_g_plan.empty() 
+			&& abs(m_g_plan.back().pose.position.x - plan.back().pose.position.x) > .01 
+			&& abs(m_g_plan.back().pose.position.y - plan.back().pose.position.y) > .01 ;
 		m_g_plan.clear();
 		m_g_plan = plan;
-		m_plan_set_for_new_nav = m_navigation_begins;
-		m_navigation_begins = false;
 		return true;
 	};
 
@@ -105,7 +108,7 @@ namespace testlib
 		m_robot_pose_initialized = false;
 		m_waypoint_initialized = false;
 		m_is_last_waypoint = false;
-		m_navigation_begins = m_plan_set_for_new_nav = false;
+		m_new_navigation = false;
 		
 	};
 
@@ -118,12 +121,14 @@ namespace testlib
 	
 	bool MyNavigator::isWaypointReached()
 	{
-		if (!ros::isInitialized()) {
+		if (!ros::isInitialized()) 
+		{
       			ROS_ERROR("[MyNavigator::isWaypointReached] This planner has not been initialized, please call initialize() before using this planner");
       			return false;
 		}
 
-		if (!m_robot_pose_initialized) {
+		if (!m_robot_pose_initialized) 
+		{
       			ROS_ERROR("[MyNavigator::isWaypointReached] This planner has not received robot pose yet.");
       			return false;
 		}
@@ -142,15 +147,12 @@ namespace testlib
 	
 	bool MyNavigator::isNextWaypointNeeded()
 	{
-		//
-		return (m_plan_set_for_new_nav&&!m_navigation_begins) 
-			|| !m_waypoint_initialized || isWaypointReached();
+		return m_new_navigation || !m_waypoint_initialized || isWaypointReached();
 	}
 	
 	void MyNavigator::goalMoveBaseCallback(const geometry_msgs::PoseStampedConstPtr& goal) 
 	{
 		ROS_INFO("\n\n\n[MyNavigator::goalMoveBaseCallback] NEW GOAL!.\n\n");
-		m_navigation_begins=true;
 	}
 };
 
@@ -158,7 +160,7 @@ namespace testlib
 PLUGINLIB_EXPORT_CLASS(testlib::MyNavigator, nav_core::BaseLocalPlanner)
 int main(int argc, char **argv)
 {
-        testlib::MyNavigator  the_node(argc, argv);
+    testlib::MyNavigator  the_node(argc, argv);
 	ros::spin();
 	return 0;
 }

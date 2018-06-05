@@ -46,7 +46,7 @@ namespace testlib // this namespace will be changed.
 			bool m_robot_pose_initialized;
 			bool m_waypoint_initialized;
 			bool m_is_last_waypoint;
-			bool m_navigation_begins,m_plan_set_for_new_nav;
+			bool m_new_navigation;
 		public:
 			/**
 			* @brief  Default constructor for the ros wrapper
