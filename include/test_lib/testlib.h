@@ -1,12 +1,12 @@
 #ifndef TESTLIB__TESTLIB_H_
 #define TESTLIB__TESTLIB_H_
-
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <geometry_msgs/Twist.h>
 #include <costmap_2d/costmap_2d_ros.h>
 #include <tf/transform_listener.h>
 #include <nav_core/base_local_planner.h>
+#include <base_local_planner/goal_functions.h> // Still don't know if it'll be useful
 #include <test_lib/mrpt_reactivenav_node.h>
 
 namespace testlib // this namespace will be changed.
@@ -33,6 +33,7 @@ namespace testlib // this namespace will be changed.
 			ros::Publisher m_goal_pub;
 			ros::Subscriber m_pose_sub;
 			ros::Subscriber m_goal_move_base_sub;
+			ros::Subscriber m_cmd_vel_sub;
 			// The global plan sended by move_base.
 			std::vector<geometry_msgs::PoseStamped> m_g_plan;
 			// Robot pose. To check if waypoint is reached.
@@ -41,7 +42,11 @@ namespace testlib // this namespace will be changed.
 			geometry_msgs::PoseStamped m_waypoint;
 			// Constant to access global path.
 			const int WAYPOINT_INDEX = 300; // If it is lower it does not work for me.
-			
+			// Current cmd_vel
+			geometry_msgs::TwistConstPtr m_cmd_vel;
+
+
+
 			double m_target_allowed_distance;
 			bool m_robot_pose_initialized;
 			bool m_waypoint_initialized;
@@ -90,7 +95,9 @@ namespace testlib // this namespace will be changed.
 			bool isWaypointReached();
 			bool isNextWaypointNeeded();
 			void goalMoveBaseCallback(const geometry_msgs::PoseStampedConstPtr& goal);
-
+			void publishPlan();
+			
+			void velCallback(const geometry_msgs::TwistConstPtr& goal);
       
 	};
 };

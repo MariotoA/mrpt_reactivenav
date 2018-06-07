@@ -48,6 +48,7 @@ namespace testlib
 			m_goal_pub.publish(m_waypoint);
 			m_waypoint_initialized = true;
 		}
+		publishPlan();
 		
 		return true;
 	};
@@ -101,6 +102,7 @@ namespace testlib
 			&MyNavigator::goalMoveBaseCallback,this);
 		m_pose_sub = m_nh.subscribe<geometry_msgs::PoseWithCovarianceStamped>("/amcl_pose",1,
 			&MyNavigator::poseCallback, this);
+		m_cmd_vel_sub = m_nh.subscribe<geometry_msgs::Twist>("/cmd_vel",1,&MyNavigator::velCallback,this);
 		m_target_allowed_distance = 0.4;
 		m_localnh.param(
 			"target_allowed_distance", m_target_allowed_distance,
@@ -153,6 +155,16 @@ namespace testlib
 	void MyNavigator::goalMoveBaseCallback(const geometry_msgs::PoseStampedConstPtr& goal) 
 	{
 		ROS_INFO("\n\n\n[MyNavigator::goalMoveBaseCallback] NEW GOAL!.\n\n");
+	}
+
+	void MyNavigator::publishPlan() 
+	{
+	
+	}
+
+	void MyNavigator::velCallback(const geometry_msgs::TwistConstPtr& goal) 
+	{
+	
 	}
 };
 
