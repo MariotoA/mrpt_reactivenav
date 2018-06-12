@@ -30,6 +30,7 @@ namespace testlib
 	MyNavigator::MyNavigator(int argc, char **args)
 	{
 		m_reactive = new ReactiveNavNode(argc,args);
+
 		ROS_INFO("BUILDER: WRAPPER NODE NAVIGATOR STARTED WITH ARGUMENTS");
 	};
 
@@ -45,8 +46,8 @@ namespace testlib
 			m_waypoint=m_g_plan[ind];
 			ROS_INFO("\n\nMyNavigator::sending goal to reactive navigator: Pose[x:%f,y:%f,z:%f]",
 			 m_waypoint.pose.position.x,m_waypoint.pose.position.y,m_waypoint.pose.position.z);
-			m_goal_pub.publish(m_waypoint);
-			m_waypoint_initialized = true;
+            m_goal_pub.publish(m_waypoint);
+            m_waypoint_initialized = true;
 		}
 		publishPlan();
 		
@@ -98,6 +99,7 @@ namespace testlib
 		ROS_INFO("testlib::MyNavigator: INITIALISING FROM METHOD MyNavigator::initialize\n");
 		m_reactive = new ReactiveNavNode(0,a);
 		m_goal_pub = m_nh.advertise<geometry_msgs::PoseStamped>("/reactive_nav_goal",1); // this should be using the param TODO
+		m_trajectory = m_localnh.advertise<nav_msgs::Path>("/trajectory_generated",1);
 		m_goal_move_base_sub = m_nh.subscribe<geometry_msgs::PoseStamped>("/move_base_simple/goal",1,
 			&MyNavigator::goalMoveBaseCallback,this);
 		m_pose_sub = m_nh.subscribe<geometry_msgs::PoseWithCovarianceStamped>("/amcl_pose",1,
@@ -154,7 +156,7 @@ namespace testlib
 	
 	void MyNavigator::goalMoveBaseCallback(const geometry_msgs::PoseStampedConstPtr& goal) 
 	{
-		ROS_INFO("\n\n\n[MyNavigator::goalMoveBaseCallback] NEW GOAL!.\n\n");
+		ROS_INFO("\n\n\n[MyNavigator::goalMoveBaseCallback] NEW GOAL!\n\n");
 	}
 
 	void MyNavigator::publishPlan() 
@@ -162,9 +164,49 @@ namespace testlib
 	
 	}
 
-	void MyNavigator::velCallback(const geometry_msgs::TwistConstPtr& goal) 
+	void MyNavigator::velCallback(const geometry_msgs::TwistConstPtr& cmd_vel) 
 	{
-	
+		if (!ros::isInitialized()) 
+		{
+      			ROS_ERROR("[MyNavigator::velCallback] This planner has not been initialized, please call initialize() before using this planner");
+      			return;
+		} else if (!m_robot_pose_initialized) 
+		{
+			ROS_ERROR("[MyNavigator::velCallback] robot pose has not been initialized.");
+			return;
+		}
+		m_cmd_vel = cmd_vel;
+		double vx = cmd_vel->linear.x;
+		double vy = cmd_vel->linear.y;
+		double w = cmd_vel->angular.z;
+		double v = sqrt(vx*vx+vy*vy);
+		geometry_msgs::PoseStamped cur_pose = m_robot_pose_, prev_pose;
+		std::unique_ptr<std::vector<geometry_msgs::PoseStamped>> trajectory;
+		trajectory->push_back(cur_pose);
+		double end_time = 5, dt = .1; // TODO Change to nav_period
+		double th;
+		
+		ROS_INFO("\n\n\n[MyNavigator::velCallback] NEW VEL COMMAND: Init !\n\n");
+		for (double time = 0; time < end_time; time+=dt)
+		{
+			prev_pose = cur_pose;
+			th = cur_pose.pose.orientation.z;
+			// Odometry to simulate trajectory
+			cur_pose.pose.position.x += (vx * cos(th) - vy * sin(th)) * dt;
+			cur_pose.pose.position.y += (vx * sin(th) + vy * cos(th)) * dt;
+			cur_pose.pose.orientation.z += w*dt;
+			cur_pose.header.seq++;
+			cur_pose.header.stamp = ros::Time::now();
+			trajectory->push_back(cur_pose);
+		}
+
+		nav_msgs::Path msg;
+		msg.header = cur_pose.header;
+		msg.header.stamp = ros::Time::now();
+		msg.poses = *(trajectory);
+		m_trajectory.publish(msg);
+		ROS_INFO("\n\n\n[MyNavigator::velCallback] NEW VEL COMMAND: vx=%f,vy=%f,w=%f !\n\n",vx,vy, w);
+		
 	}
 };
 

@@ -31,6 +31,7 @@ namespace testlib // this namespace will be changed.
 			ros::NodeHandle m_nh;
 			ros::NodeHandle m_localnh{"~"}; // this way it initializes non const static attributes.
 			ros::Publisher m_goal_pub;
+			ros::Publisher m_trajectory;
 			ros::Subscriber m_pose_sub;
 			ros::Subscriber m_goal_move_base_sub;
 			ros::Subscriber m_cmd_vel_sub;
