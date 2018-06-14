@@ -26,7 +26,7 @@
     </include>
     <include file="$(find mrpt_reactivenav)/launch/simbot_move_base.launch" />
     <include file="$(find tfg_reactive_pkg)/launch/simbot_fake_loc.launch" />
-  
+    <node pkg="keyboard_control" type="keyboard_control" name="keyboard_control" />
     
     ### RVIZ ###
     <node name="rviz_player" pkg="rviz" type="rviz" args="-d $(find mrpt_reactivenav)/cfg/rvizco.rviz"/>

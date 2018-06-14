@@ -175,18 +175,20 @@ namespace testlib
 			ROS_ERROR("[MyNavigator::velCallback] robot pose has not been initialized.");
 			return;
 		}
+		
+		ROS_INFO("\n\n\n[MyNavigator::velCallback] NEW VEL COMMAND: Init !\n\n");
 		m_cmd_vel = cmd_vel;
 		double vx = cmd_vel->linear.x;
 		double vy = cmd_vel->linear.y;
 		double w = cmd_vel->angular.z;
 		double v = sqrt(vx*vx+vy*vy);
 		geometry_msgs::PoseStamped cur_pose = m_robot_pose_, prev_pose;
-		std::unique_ptr<std::vector<geometry_msgs::PoseStamped>> trajectory;
+		std::unique_ptr<std::vector<geometry_msgs::PoseStamped>> trajectory(new std::vector<geometry_msgs::PoseStamped>());
 		trajectory->push_back(cur_pose);
 		double end_time = 5, dt = .1; // TODO Change to nav_period
 		double th;
 		
-		ROS_INFO("\n\n\n[MyNavigator::velCallback] NEW VEL COMMAND: Init !\n\n");
+		ROS_INFO("\n\n\n[MyNavigator::velCallback] NEW VEL COMMAND: Sending... !\n\n");
 		for (double time = 0; time < end_time; time+=dt)
 		{
 			prev_pose = cur_pose;

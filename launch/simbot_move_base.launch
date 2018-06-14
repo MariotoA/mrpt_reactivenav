@@ -23,6 +23,8 @@
 		<param name="cfg_file_reactive" value="$(find mrpt_reactivenav)/tutorial/reactive2d_config3.ini"/>
 
 		<param name="base_global_planner" value="$(arg global_planner_plugin)"/>
+		
+		<param name="topic_robot_shape" value="/chassis_polygon" />
 		## Planners
     		<rosparam file="$(find mrpt_reactivenav)/move_base_conf/simbot_global_planner_params.yaml" command="load" />
     		
