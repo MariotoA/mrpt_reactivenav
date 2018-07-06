@@ -19,12 +19,13 @@
 	<node pkg="mrpt_local_obstacles" type="mrpt_local_obstacles_node" name="mrpt_local_obstacles_node" output="screen">
 		<param name="source_topics_2dscan" value="laser_scan"/>
 		<param name="show_gui" value="false"/>
-		<!-- <param name="time_window" value="5"/>-->
+		 <!--<param name="time_window" value="5"/> -->
 	</node>
 	
     <include file="$(find tfg_reactive_pkg)/launch/simbot_urdf.launch" />
+
     <node pkg="shape_publisher" type="shape_publisher" name="shape_publisher" output="screen" launch-prefix="xterm -e">
-	<rosparam file="$(find shape_publisher)/shape_file/giraff.yaml" command="load" />
+		<rosparam file="$(find shape_publisher)/shape_file/giraff.yaml" command="load" />
     </node>
 
 
@@ -34,7 +35,7 @@
 		<param name="nav_type" value="2D"/> 
 
 		<!-- *Important*: This external config file holds the most important navigation settings -->
-		<param name="cfg_file_reactive" value="$(find mrpt_reactivenav)/tutorial/reactive2d_config3.ini"/>
+		<param name="cfg_file_reactive" value="$(find mrpt_reactivenav)/tutorial/reactive2d_custom_config.ini"/>
 		<!--<param name="cfg_file_reactive" value="$(find mrpt_reactivenav)/tutorial/reactive3d_config.ini"/>  -->
 
 		<!-- This is to allow the reactive responsive to RVIZ GUI commands -->

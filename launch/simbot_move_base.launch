@@ -10,7 +10,7 @@
   <arg name="local_planner_plugin" default="testlib::MyNavigator"/>
 
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" launch-prefix="$(arg launch_prefix)" output="screen">
-  
+
 	# Set type of reactive navigator (2D or 3D)
 		<param name="nav_type" value="2D"/> 
 
@@ -19,8 +19,9 @@
 		<param name="topic_relative_nav_goal" value="reactive_nav_goal"/>
 		# *Important*: This external config file holds the most important navigation settings
 		<param name="base_local_planner" value="$(arg local_planner_plugin)"/>
+		<param name="cfg_file_reactive" value="$(find mrpt_reactivenav)/tutorial/reactive2d_custom_config.ini"/>
+		<param name="topic_robot_shape" value="/chassis_polygon" />
 
-		<param name="cfg_file_reactive" value="$(find mrpt_reactivenav)/tutorial/reactive2d_config3.ini"/>
 
 		<param name="base_global_planner" value="$(arg global_planner_plugin)"/>
 		## Planners
