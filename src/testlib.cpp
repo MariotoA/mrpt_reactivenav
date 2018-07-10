@@ -38,16 +38,27 @@ namespace testlib
 		//TODO
 		// We're gonna ignore cmd_vel and send the goal to mrpt's reactive navigation engine.
 		// Trouble when user cancels navigation.
-		if (!m_g_plan.empty() && isNextWaypointNeeded()) 
+		if (m_plan_a)
 		{
-			m_is_last_waypoint = m_g_plan.size() < WAYPOINT_INDEX;
-			int ind = m_is_last_waypoint ? m_g_plan.size() - 1 : WAYPOINT_INDEX;
-			m_waypoint=m_g_plan[ind];
-			ROS_INFO("\n\nMyNavigator::sending goal to reactive navigator: Pose[x:%f,y:%f,z:%f]",
-			 m_waypoint.pose.position.x,m_waypoint.pose.position.y,m_waypoint.pose.position.z);
-			m_goal_pub.publish(m_waypoint);
-			m_waypoint_initialized = true;
+			if (!m_g_plan.empty() && isNextWaypointNeeded()) 
+			{
+				m_is_last_waypoint = m_g_plan.size() < WAYPOINT_INDEX;
+				int ind = m_is_last_waypoint ? m_g_plan.size() - 1 : WAYPOINT_INDEX;
+				m_waypoint=m_g_plan[ind];
+				ROS_INFO("\n\nMyNavigator::sending goal to reactive navigator: Pose[x:%f,y:%f,z:%f]",
+				 m_waypoint.pose.position.x,m_waypoint.pose.position.y,m_waypoint.pose.position.z);
+				m_goal_pub.publish(m_waypoint);
+				m_waypoint_initialized = true;
+			}
+		} else
+		{
+			if (!m_g_plan.empty() && !m_waypoint_initialized) 
+			{
+				m_reactive->onRosPlanReceived(m_g_plan, WAYPOINT_INDEX);
+				m_waypoint_initialized = true;
+			}
 		}
+		
 		
 		return true;
 	};
@@ -152,7 +163,11 @@ namespace testlib
 	
 	void MyNavigator::goalMoveBaseCallback(const geometry_msgs::PoseStampedConstPtr& goal) 
 	{
-		ROS_INFO("\n\n\n[MyNavigator::goalMoveBaseCallback] NEW GOAL!.\n\n");
+		ROS_INFO("\n\n\n[MyNavigator::goalMoveBaseCallback] NEW GOAL!\n\n");
+		if (!m_plan_a)
+		{
+			m_waypoint_initialized = false;
+		}
 	}
 };
 

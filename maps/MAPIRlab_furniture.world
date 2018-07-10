@@ -32,7 +32,7 @@ define LaserFront ranger          # Infra-red (IR) range sensor
 (
   sensor(
     range [ 0.0  30.0 ]           #min max in [m]
-    fov 270.25                    #deg
+    fov 360 #270.25                    #deg
     samples 1081                  #Num samples
   )
 

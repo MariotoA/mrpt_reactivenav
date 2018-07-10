@@ -47,6 +47,14 @@ namespace testlib // this namespace will be changed.
 			bool m_waypoint_initialized;
 			bool m_is_last_waypoint;
 			bool m_new_navigation;
+
+			
+			// ROBOT MODE. If m_plan_a is set to true:
+			// single point online navigation (when point reached, new navigation starts)
+			// if m_plan_a is set to false:
+			// it starts waypoint navigation via mrpt's CWaypointsNavigator.h (look)
+			const bool m_plan_a = false;
+
 		public:
 			/**
 			* @brief  Default constructor for the ros wrapper

@@ -74,6 +74,10 @@ using namespace mrpt::utils;
 
 #include <mutex>
 
+//
+
+#include <mrpt/nav/reactive/TWaypoint.h>
+
 // The ROS node
 class ReactiveNavNode
 {
@@ -432,7 +436,74 @@ class ReactiveNavNode
 
 		m_reactive_nav_engine->navigationStep();
 	}
+	
+	// onRosPlanReceived() TODO
+	void onRosPlanReceived(const std::vector<geometry_msgs::PoseStamped>& plan, int increm) //Not an actual callback
+	{
+		
+		if (!plan.empty()) 
+		{
+			m_reactive_nav_engine->cancel();
+			mrpt::nav::TWaypointSequence msg;
+			
+			ROS_INFO("Not empty.");	
+			for(auto dir = plan.begin() ; dir <= plan.end() - increm; dir+=increm) 
+			{
+				
+				ROS_INFO("For.");
+				geometry_msgs::PoseStamped pose = *dir;
+				
+				ROS_INFO("Pose obtained.");
+				// m_target_allowed_distance
+				if (pose.header.frame_id != m_frameid_reference)
+				{
+					
+					ROS_INFO("Adjust.");
+					try
+					{
+						geometry_msgs::PoseStamped trg2;
+						m_tf_listener.transformPose(m_frameid_reference, pose, trg2);
+						pose = trg2;
+					}
+					catch (tf::TransformException& ex)
+					{
+						ROS_ERROR("%s", ex.what());
+						return;
+					}
+				}
+				mrpt::nav::TWaypoint single_waypoint(pose.pose.position.x,
+					pose.pose.position.y,m_target_allowed_distance);
+				msg.waypoints.push_back(single_waypoint);
+		 	}
+			
 
+			geometry_msgs::PoseStamped pose = plan.back();
+
+			if (pose.header.frame_id != m_frameid_reference)
+			{
+				try
+				{
+					geometry_msgs::PoseStamped trg2;
+					m_tf_listener.transformPose(m_frameid_reference, pose, trg2);
+					pose = trg2;
+				}
+				catch (tf::TransformException& ex)
+				{
+					ROS_ERROR("%s", ex.what());
+					return;
+				}
+			}
+
+			mrpt::nav::TWaypoint single_waypoint(pose.pose.position.x,
+					pose.pose.position.y, m_target_allowed_distance,
+					 false, pose.pose.orientation.z);
+			msg.waypoints.push_back(single_waypoint);
+			m_reactive_nav_engine->navigateWaypoints(msg);
+			msg.clear();
+		}
+	}
+
+	
 	void onRosGoalReceived(const geometry_msgs::PoseStampedConstPtr& trg_ptr)
 	{
 		geometry_msgs::PoseStamped trg = *trg_ptr;
