@@ -53,7 +53,7 @@ namespace testlib // this namespace will be changed.
 			// single point online navigation (when point reached, new navigation starts)
 			// if m_plan_a is set to false:
 			// it starts waypoint navigation via mrpt's CWaypointsNavigator.h (look)
-			const bool m_plan_a = false;
+			const bool m_plan_a = true;
 
 		public:
 			/**

@@ -10,28 +10,31 @@
   <arg name="local_planner_plugin" default="testlib::MyNavigator"/>
 
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" launch-prefix="$(arg launch_prefix)" output="screen">
-
-	# Set type of reactive navigator (2D or 3D)
+		
+		## BaseLocalPlanner mrpt controller config files and params.
+		<param name="base_local_planner" value="$(arg local_planner_plugin)"/>
+		# Set type of reactive navigator (2D or 3D)
 		<param name="nav_type" value="2D"/> 
-
 		# This sends the distance to the target used by mrpt_reactivenav
 		<param name="target_allowed_distance" value="0.1"/>
+		# Topic to subscribe to get reactive goals (waypoints)
 		<param name="topic_relative_nav_goal" value="reactive_nav_goal"/>
 		# *Important*: This external config file holds the most important navigation settings
-		<param name="base_local_planner" value="$(arg local_planner_plugin)"/>
 		<param name="cfg_file_reactive" value="$(find mrpt_reactivenav)/tutorial/reactive2d_custom_config.ini"/>
+		# Topic to subscribe to get robot shape.
 		<param name="topic_robot_shape" value="/chassis_polygon" />
-
-
+		# Rate base_local_planner calls its methods.
+		<param name="controller_frequency" value="1.5"/> # This solves the "pitching" problem
+		
+		## Global planner config
 		<param name="base_global_planner" value="$(arg global_planner_plugin)"/>
-		## Planners
-    		<rosparam file="$(find mrpt_reactivenav)/move_base_conf/simbot_global_planner_params.yaml" command="load" />
-    		
-    		## Costmaps
-    		<rosparam file="$(find mrpt_reactivenav)/move_base_conf/simbot_costmap_global_params.yaml" command="load" />
-    		<rosparam file="$(find mrpt_reactivenav)/move_base_conf/simbot_costmap_common_params.yaml" command="load" />    
-    		<rosparam file="$(find mrpt_reactivenav)/move_base_conf/simbot_costmap_common_params.yaml" command="load" ns="global_costmap" />
-    		<rosparam file="$(find mrpt_reactivenav)/move_base_conf/simbot_costmap_common_params.yaml" command="load" ns="global_costmap/obstacles" />
+		# Planners
+    	<rosparam file="$(find mrpt_reactivenav)/move_base_conf/simbot_global_planner_params.yaml" command="load" />
+    	# Costmaps
+    	<rosparam file="$(find mrpt_reactivenav)/move_base_conf/simbot_costmap_global_params.yaml" command="load" />
+    	<rosparam file="$(find mrpt_reactivenav)/move_base_conf/simbot_costmap_common_params.yaml" command="load" />    
+    	<rosparam file="$(find mrpt_reactivenav)/move_base_conf/simbot_costmap_common_params.yaml" command="load" ns="global_costmap" />
+    	<rosparam file="$(find mrpt_reactivenav)/move_base_conf/simbot_costmap_common_params.yaml" command="load" ns="global_costmap/obstacles" />
     
   </node>
   

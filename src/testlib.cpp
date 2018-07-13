@@ -14,11 +14,12 @@ namespace testlib
 
 	MyNavigator::MyNavigator() 
 	{
-		ROS_INFO("BUILDER: WRAPPER NODE NAVIGATOR STARTED");
+		ROS_INFO("BUILDER: WRAPPER NODE FOR MRPT_REACTIVENAV_NODE NAVIGATOR STARTED");
 	};
 
 	MyNavigator::~MyNavigator() 
 	{
+		delete m_reactive;
 	};
 
 	MyNavigator::MyNavigator(std::string name, tf::TransformListener* tf, costmap_2d::Costmap2DROS* costmap_ros) 
@@ -30,7 +31,7 @@ namespace testlib
 	MyNavigator::MyNavigator(int argc, char **args)
 	{
 		m_reactive = new ReactiveNavNode(argc,args);
-		ROS_INFO("BUILDER: WRAPPER NODE NAVIGATOR STARTED WITH ARGUMENTS");
+		ROS_INFO("BUILDER: WRAPPER NODE FOR MRPT_REACTIVENAV_NODE NAVIGATOR STARTED WITH ARGUMENTS");
 	};
 
 	bool MyNavigator::computeVelocityCommands(geometry_msgs::Twist& cmd_vel)
@@ -88,9 +89,9 @@ namespace testlib
 		// Before storing next plan, last goal is stored. It could be that goal was not last pose of path for all globalplanners
 		
 		// Checks if it is first initialization. We suppose is at least 1 in size when goal is sent.
-		m_new_navigation = !m_g_plan.empty() 
-			&& abs(m_g_plan.back().pose.position.x - plan.back().pose.position.x) > .01 
-			&& abs(m_g_plan.back().pose.position.y - plan.back().pose.position.y) > .01 ;
+		m_new_navigation = true;
+			//!m_g_plan.empty() && abs(m_g_plan.back().pose.position.x - plan.back().pose.position.x) > .01 
+			//&& abs(m_g_plan.back().pose.position.y - plan.back().pose.position.y) > .01 ;
 		m_g_plan.clear();
 		m_g_plan = plan;
 		return true;
@@ -104,7 +105,6 @@ namespace testlib
 		char x = 'a';
 		char *c = &x;
 		char **a = &c;
-		//MyNavigator::setNavNode(0,&a);
 		ROS_INFO("testlib::MyNavigator: INITIALISING FROM METHOD MyNavigator::initialize\n");
 		m_reactive = new ReactiveNavNode(0,a);
 		m_goal_pub = m_nh.advertise<geometry_msgs::PoseStamped>("/reactive_nav_goal",1); // this should be using the param TODO
