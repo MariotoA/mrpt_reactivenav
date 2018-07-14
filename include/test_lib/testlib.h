@@ -32,7 +32,6 @@ namespace testlib // this namespace will be changed.
 			ros::NodeHandle m_localnh{"~"}; // this way it initializes non const static attributes.
 			ros::Publisher m_goal_pub;
 			ros::Subscriber m_pose_sub;
-			ros::Subscriber m_goal_move_base_sub;
 			ros::Subscriber m_pub_cmd_vel;
 			// The global plan sended by move_base.
 			std::vector<geometry_msgs::PoseStamped> m_g_plan;
@@ -48,16 +47,16 @@ namespace testlib // this namespace will be changed.
 			
 			double m_target_allowed_distance;
 			bool m_robot_pose_initialized;
-			bool m_waypoint_initialized;
 			bool m_is_last_waypoint;
 			bool m_new_navigation;
 			
-			// ROBOT MODE. If m_plan_a is set to true:
-			// single point online navigation (when point reached, new navigation starts)
-			// if m_plan_a is set to false:
-			// it starts waypoint navigation via mrpt's CWaypointsNavigator.h (look)
-			const bool m_plan_a = false;
+			////////////////////// Methods:
 
+
+			void poseCallback(geometry_msgs::PoseWithCovarianceStamped robotPose);
+			void velocityCommandCallback(const geometry_msgs::Twist& cmd_vel);
+			bool isWaypointReached();
+			bool isNextWaypointNeeded();
 		public:
 			/**
 			* @brief  Default constructor for the ros wrapper
@@ -93,13 +92,6 @@ namespace testlib // this namespace will be changed.
 			* @param costmap_ros The cost map to use for assigning costs to local plans
  			*/
 			void initialize(std::string name, tf::TransformListener* tf, costmap_2d::Costmap2DROS* costmap_ros) override;
-
-
-			void poseCallback(geometry_msgs::PoseWithCovarianceStamped robotPose);
-			void velocityCommandCallback(const geometry_msgs::Twist& cmd_vel);
-			bool isWaypointReached();
-			bool isNextWaypointNeeded();
-			void goalMoveBaseCallback(const geometry_msgs::PoseStampedConstPtr& goal);
 
       
 	};

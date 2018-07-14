@@ -26,8 +26,7 @@ namespace testlib
 	{
 		//TODO
 		// We're gonna send the goal to mrpt's reactive navigation engine and then receive the command from them.
-		if (m_plan_a)
-		{
+
 			if (!m_g_plan.empty() && isNextWaypointNeeded()) 
 			{
 				m_is_last_waypoint = m_g_plan.size() < WAYPOINT_INDEX;
@@ -36,17 +35,7 @@ namespace testlib
 				ROS_INFO("\n\nMyNavigator::sending goal to reactive navigator: Pose[x:%f,y:%f,z:%f]",
 				 m_waypoint.pose.position.x,m_waypoint.pose.position.y,m_waypoint.pose.position.z);
 				m_goal_pub.publish(m_waypoint);
-				m_waypoint_initialized = true;
 			}
-		} else
-		{
-			// Trouble when user cancels navigation.
-			if (!m_g_plan.empty() && !m_waypoint_initialized) 
-			{
-				m_reactive->onRosPlanReceived(m_g_plan, WAYPOINT_INDEX);
-				m_waypoint_initialized = true;
-			}
-		}
 
 		cmd_vel = m_cmd_vel;
 
@@ -61,7 +50,7 @@ namespace testlib
 		// TODO
 		bool end = m_is_last_waypoint && isWaypointReached();
 		if (end)
-			m_robot_pose_initialized = m_waypoint_initialized = m_is_last_waypoint = false;
+			m_robot_pose_initialized = m_is_last_waypoint = false;
 		// Go back to initial state.
 		return end;
 	};
@@ -92,9 +81,9 @@ namespace testlib
 		char **a = &c;
 		ROS_INFO("testlib::MyNavigator: INITIALISING FROM METHOD MyNavigator::initialize\n");
 		m_reactive = new ReactiveNavNode(0,a);
-		m_goal_pub = m_nh.advertise<geometry_msgs::PoseStamped>("/reactive_nav_goal",1); // this should be using the param TODO
-		m_goal_move_base_sub = m_nh.subscribe<geometry_msgs::PoseStamped>("/move_base_simple/goal",1,
-			&MyNavigator::goalMoveBaseCallback,this);
+		std::string topic_reactive_goal = "/reactive_nav_goal";
+		m_localnh.param("topic_relative_nav_goal", topic_reactive_goal,topic_reactive_goal);
+		m_goal_pub = m_nh.advertise<geometry_msgs::PoseStamped>(topic_reactive_goal,1);
 		m_pose_sub = m_nh.subscribe<geometry_msgs::PoseWithCovarianceStamped>("/amcl_pose",1,
 			&MyNavigator::poseCallback, this);
 		m_target_allowed_distance = 0.4;
@@ -106,7 +95,6 @@ namespace testlib
 		m_pub_cmd_vel = m_nh.subscribe<const geometry_msgs::Twist&>(topic_cmd_vel, 1,
 			&MyNavigator::velocityCommandCallback, this);
 		m_robot_pose_initialized = false;
-		m_waypoint_initialized = false;
 		m_is_last_waypoint = false;
 		m_new_navigation = false;
 		
@@ -143,16 +131,7 @@ namespace testlib
 	
 	bool MyNavigator::isNextWaypointNeeded()
 	{
-		return m_new_navigation || !m_waypoint_initialized || isWaypointReached();
-	}
-	
-	void MyNavigator::goalMoveBaseCallback(const geometry_msgs::PoseStampedConstPtr& goal) 
-	{
-		ROS_INFO("\n\n\n[MyNavigator::goalMoveBaseCallback] NEW GOAL!\n\n");
-		if (!m_plan_a)
-		{
-			m_waypoint_initialized = false;
-		}
+		return m_new_navigation || isWaypointReached();
 	}
 	
 	void MyNavigator::velocityCommandCallback(const geometry_msgs::Twist& cmd_vel)
