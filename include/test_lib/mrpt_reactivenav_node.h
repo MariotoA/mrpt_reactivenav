@@ -111,6 +111,7 @@ class ReactiveNavNode
 	std::string m_pub_topic_reactive_nav_goal;
 	std::string m_sub_topic_local_obstacles;
 	std::string m_sub_topic_robot_shape;
+	std::string m_pub_topic_cmd_vel;	
 
 	std::string m_frameid_reference;
 	std::string m_frameid_robot;
@@ -278,6 +279,7 @@ class ReactiveNavNode
 		  m_pub_topic_reactive_nav_goal("reactive_nav_goal"),
 		  m_sub_topic_local_obstacles("local_map_pointcloud"),
 		  m_sub_topic_robot_shape(""),
+		  m_pub_topic_cmd_vel("cmd_vel"),
 		  m_frameid_reference("/map"),
 		  m_frameid_robot("base_link"),
 		  m_save_nav_log(false),
@@ -285,17 +287,17 @@ class ReactiveNavNode
 	{
 		// Load params:
 		std::string cfg_file_reactive;
-                m_localn.param("nav_type", nav_type, nav_type); // could be 2D or 3D
+        m_localn.param("nav_type", nav_type, nav_type); // could be 2D or 3D
 
-                if( nav_type == "2D" )
-                    m_reactive_nav_engine.reset(new CReactiveNavigationSystem(m_reactive_if));
-                else if ( nav_type == "3D" )
-                    m_reactive_nav_engine.reset(new CReactiveNavigationSystem3D(m_reactive_if));
-                else
-                {
-                    ROS_INFO("Incorrect navigation type. It should be 2D or 3D");
-                    return;
-                }
+        if( nav_type == "2D" )
+        	m_reactive_nav_engine.reset(new CReactiveNavigationSystem(m_reactive_if));
+        else if ( nav_type == "3D" )
+        	m_reactive_nav_engine.reset(new CReactiveNavigationSystem3D(m_reactive_if));
+        else
+        {
+        	ROS_INFO("Incorrect navigation type. It should be 2D or 3D");
+        	return;
+        }
 		m_localn.param(
 			"cfg_file_reactive", cfg_file_reactive, cfg_file_reactive);
 		m_localn.param(
@@ -312,7 +314,7 @@ class ReactiveNavNode
 			"topic_relative_nav_goal", m_pub_topic_reactive_nav_goal,
 			m_pub_topic_reactive_nav_goal);
 		m_localn.param("save_nav_log", m_save_nav_log, m_save_nav_log);
-
+		m_localn.param("topic_cmd_vel", m_pub_topic_cmd_vel,m_pub_topic_cmd_vel);
 		ROS_ASSERT(m_nav_period > 0);
 		ROS_ASSERT_MSG(
 			!cfg_file_reactive.empty(),
@@ -360,7 +362,7 @@ class ReactiveNavNode
 
 		// Init ROS publishers:
 		// -----------------------
-		m_pub_cmd_vel = m_nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
+		m_pub_cmd_vel = m_nh.advertise<geometry_msgs::Twist>(m_pub_topic_cmd_vel, 1);
 
 		// Init ROS subs:
 		// -----------------------
