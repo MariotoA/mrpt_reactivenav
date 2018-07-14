@@ -56,15 +56,13 @@ namespace testlib // this namespace will be changed.
 			// single point online navigation (when point reached, new navigation starts)
 			// if m_plan_a is set to false:
 			// it starts waypoint navigation via mrpt's CWaypointsNavigator.h (look)
-			const bool m_plan_a = true;
+			const bool m_plan_a = false;
 
 		public:
 			/**
 			* @brief  Default constructor for the ros wrapper
 			*/
 			MyNavigator();
-		 	MyNavigator(std::string name, tf::TransformListener* tf, costmap_2d::Costmap2DROS* costmap_ros);
-			MyNavigator(int argc, char **args);
 			~MyNavigator();
 			
 			/**

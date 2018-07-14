@@ -22,23 +22,10 @@ namespace testlib
 		delete m_reactive;
 	};
 
-	MyNavigator::MyNavigator(std::string name, tf::TransformListener* tf, costmap_2d::Costmap2DROS* costmap_ros) 
-	{
-		//MyNavigator::initialize(name,tf,costmap_ros);	
-
-	};
-
-	MyNavigator::MyNavigator(int argc, char **args)
-	{
-		m_reactive = new ReactiveNavNode(argc,args);
-		ROS_INFO("BUILDER: WRAPPER NODE FOR MRPT_REACTIVENAV_NODE NAVIGATOR STARTED WITH ARGUMENTS");
-	};
-
 	bool MyNavigator::computeVelocityCommands(geometry_msgs::Twist& cmd_vel)
 	{
 		//TODO
-		// We're gonna ignore cmd_vel and send the goal to mrpt's reactive navigation engine.
-		// Trouble when user cancels navigation.
+		// We're gonna send the goal to mrpt's reactive navigation engine and then receive the command from them.
 		if (m_plan_a)
 		{
 			if (!m_g_plan.empty() && isNextWaypointNeeded()) 
@@ -53,14 +40,17 @@ namespace testlib
 			}
 		} else
 		{
+			// Trouble when user cancels navigation.
 			if (!m_g_plan.empty() && !m_waypoint_initialized) 
 			{
 				m_reactive->onRosPlanReceived(m_g_plan, WAYPOINT_INDEX);
 				m_waypoint_initialized = true;
 			}
 		}
+
 		cmd_vel = m_cmd_vel;
-		return true;
+
+		return cmd_vel.linear.x >= .001 || cmd_vel.angular.z >= .001;
 	};
 
 	bool MyNavigator::isGoalReached() 
@@ -86,11 +76,7 @@ namespace testlib
 		}
 
 		// Before storing next plan, last goal is stored. It could be that goal was not last pose of path for all globalplanners
-		
-		// Checks if it is first initialization. We suppose is at least 1 in size when goal is sent.
 		m_new_navigation = true;
-			//!m_g_plan.empty() && abs(m_g_plan.back().pose.position.x - plan.back().pose.position.x) > .01 
-			//&& abs(m_g_plan.back().pose.position.y - plan.back().pose.position.y) > .01 ;
 		m_g_plan.clear();
 		m_g_plan = plan;
 		return true;
@@ -149,13 +135,9 @@ namespace testlib
 		double x=m_robot_pose_.pose.position.x-m_waypoint.pose.position.x;
 		double y=m_robot_pose_.pose.position.y-m_waypoint.pose.position.y;
 		bool res = sqrt(x*x + y*y) <= m_target_allowed_distance;
-		if (res)
-		{
-			ROS_INFO("\n\n\n[MyNavigator::isWaypointReached] Waypoint reached.\n\n");	
-		} else 
-		{
-			ROS_INFO("[MyNavigator::isWaypointReached] Waypoint not reached yet.");	
-		}
+		ROS_INFO(res? "\n\n\n[MyNavigator::isWaypointReached] Waypoint reached.\n\n"
+					: "[MyNavigator::isWaypointReached] Waypoint not reached yet."
+		);
 		return res;
 	}
 	
@@ -179,11 +161,4 @@ namespace testlib
 	}
 };
 
-
 PLUGINLIB_EXPORT_CLASS(testlib::MyNavigator, nav_core::BaseLocalPlanner)
-int main(int argc, char **argv)
-{
-    testlib::MyNavigator  the_node(argc, argv);
-	ros::spin();
-	return 0;
-}
