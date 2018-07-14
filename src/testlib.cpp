@@ -59,12 +59,7 @@ namespace testlib
 				m_waypoint_initialized = true;
 			}
 		}
-		
-		//if (m_cmd_vel_set)
-		//{
-			cmd_vel = m_cmd_vel;
-		//	m_cmd_vel_set = false;
-		//}
+		cmd_vel = m_cmd_vel;
 		return true;
 	};
 
@@ -128,7 +123,6 @@ namespace testlib
 		m_waypoint_initialized = false;
 		m_is_last_waypoint = false;
 		m_new_navigation = false;
-		m_cmd_vel_set = false;
 		
 	};
 
@@ -182,7 +176,6 @@ namespace testlib
 	void MyNavigator::velocityCommandCallback(const geometry_msgs::Twist& cmd_vel)
 	{
 		m_cmd_vel = cmd_vel;
-		m_cmd_vel_set = true;
 	}
 };
 
