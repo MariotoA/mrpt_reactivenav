@@ -60,7 +60,11 @@ namespace testlib
 			}
 		}
 		
-		
+		//if (m_cmd_vel_set)
+		//{
+			cmd_vel = m_cmd_vel;
+		//	m_cmd_vel_set = false;
+		//}
 		return true;
 	};
 
@@ -116,10 +120,15 @@ namespace testlib
 		m_localnh.param(
 			"target_allowed_distance", m_target_allowed_distance,
 			m_target_allowed_distance);
+		std::string topic_cmd_vel = "cmd_vel";
+		m_localnh.param("topic_cmd_vel", topic_cmd_vel,topic_cmd_vel);
+		m_pub_cmd_vel = m_nh.subscribe<const geometry_msgs::Twist&>(topic_cmd_vel, 1,
+			&MyNavigator::velocityCommandCallback, this);
 		m_robot_pose_initialized = false;
 		m_waypoint_initialized = false;
 		m_is_last_waypoint = false;
 		m_new_navigation = false;
+		m_cmd_vel_set = false;
 		
 	};
 
@@ -168,6 +177,12 @@ namespace testlib
 		{
 			m_waypoint_initialized = false;
 		}
+	}
+	
+	void MyNavigator::velocityCommandCallback(const geometry_msgs::Twist& cmd_vel)
+	{
+		m_cmd_vel = cmd_vel;
+		m_cmd_vel_set = true;
 	}
 };
 

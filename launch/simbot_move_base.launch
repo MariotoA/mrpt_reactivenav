@@ -12,6 +12,7 @@
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" launch-prefix="$(arg launch_prefix)" output="screen">
 		
 		## BaseLocalPlanner mrpt controller config files and params.
+		# The plugin itself, name defined in said argument.
 		<param name="base_local_planner" value="$(arg local_planner_plugin)"/>
 		# Set type of reactive navigator (2D or 3D)
 		<param name="nav_type" value="2D"/> 
@@ -24,8 +25,10 @@
 		# Topic to subscribe to get robot shape.
 		<param name="topic_robot_shape" value="/chassis_polygon" />
 		# Rate base_local_planner calls its methods.
-		<param name="controller_frequency" value="1.5"/> # This solves the "pitching" problem
-		
+		 <param name="controller_frequency" value="50"/> # This solves the "pitching" problem
+		# Topic to advertise velocity commands. Default is "cmd_vel".		
+		<param name="topic_cmd_vel" value="reactive_nav_cmd_vel"/>
+
 		## Global planner config
 		<param name="base_global_planner" value="$(arg global_planner_plugin)"/>
 		# Planners

@@ -33,21 +33,25 @@ namespace testlib // this namespace will be changed.
 			ros::Publisher m_goal_pub;
 			ros::Subscriber m_pose_sub;
 			ros::Subscriber m_goal_move_base_sub;
+			ros::Subscriber m_pub_cmd_vel;
 			// The global plan sended by move_base.
 			std::vector<geometry_msgs::PoseStamped> m_g_plan;
-			// Robot pose. To check if waypoint is reached.
+			// Robot pose. To check if waypoint is reached. TODO. Issue #9
 			geometry_msgs::PoseStamped m_robot_pose_;
 			// Current waypoint.
 			geometry_msgs::PoseStamped m_waypoint;
+			// Pointer to current cmd_vel.
+			geometry_msgs::Twist m_cmd_vel;
 			// Constant to access global path.
 			const int WAYPOINT_INDEX = 300; // If it is lower it does not work for me.
+			
 			
 			double m_target_allowed_distance;
 			bool m_robot_pose_initialized;
 			bool m_waypoint_initialized;
 			bool m_is_last_waypoint;
 			bool m_new_navigation;
-
+			bool m_cmd_vel_set;
 			
 			// ROBOT MODE. If m_plan_a is set to true:
 			// single point online navigation (when point reached, new navigation starts)
@@ -95,6 +99,7 @@ namespace testlib // this namespace will be changed.
 
 
 			void poseCallback(geometry_msgs::PoseWithCovarianceStamped robotPose);
+			void velocityCommandCallback(const geometry_msgs::Twist& cmd_vel);
 			bool isWaypointReached();
 			bool isNextWaypointNeeded();
 			void goalMoveBaseCallback(const geometry_msgs::PoseStampedConstPtr& goal);
