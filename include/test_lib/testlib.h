@@ -31,19 +31,21 @@ namespace testlib // this namespace will be changed.
 			ros::NodeHandle m_nh;
 			ros::NodeHandle m_localnh{"~"}; // this way it initializes non const static attributes.
 			ros::Publisher m_goal_pub;
-			ros::Subscriber m_pose_sub;
 			ros::Subscriber m_pub_cmd_vel;
 			// The global plan sended by move_base.
 			std::vector<geometry_msgs::PoseStamped> m_g_plan;
 			// Robot pose. To check if waypoint is reached. TODO. Issue #9
-			geometry_msgs::PoseStamped m_robot_pose_;
+			tf::Stamped<tf::Pose> m_current_pose;
 			// Current waypoint.
 			geometry_msgs::PoseStamped m_waypoint;
 			// Pointer to current cmd_vel.
 			geometry_msgs::Twist m_cmd_vel;
 			// Constant to access global path.
 			const int WAYPOINT_INDEX = 300; // If it is lower it does not work for me.
-			
+			// Costmap received from global planner
+			costmap_2d::Costmap2DROS* m_costmap_ros;
+			// tfListener to be used with cloudpoints
+			tf::TransformListener* m_tf;
 			
 			double m_target_allowed_distance;
 			bool m_robot_pose_initialized;
@@ -52,8 +54,6 @@ namespace testlib // this namespace will be changed.
 			
 			////////////////////// Methods:
 
-
-			void poseCallback(geometry_msgs::PoseWithCovarianceStamped robotPose);
 			void velocityCommandCallback(const geometry_msgs::Twist& cmd_vel);
 			bool isWaypointReached();
 			bool isNextWaypointNeeded();
@@ -78,7 +78,7 @@ namespace testlib // this namespace will be changed.
 
 			/**
 			*	This needs to calculate a plan guided by plan
-			*	@arg-global_plan: Vector of poses presumably sended by global planner
+			*	@arg-global_plan: Vector of poses presumably sent by global planner
 			*	
 			* @brief  Set the plan that the local planner is following
 			* @param plan The plan to pass to the local planner
