@@ -88,20 +88,27 @@ namespace testlib
 		char **a = &c;
 		ROS_INFO("testlib::MyNavigator: INITIALISING FROM METHOD MyNavigator::initialize\n");
 		m_reactive = new ReactiveNavNode(0,a);
+		// Storing costmap and tf to obtain robot pose later
 		m_costmap_ros = costmap_ros;
 		m_costmap_ros->getRobotPose(m_current_pose);
 		m_tf = tf;
+		// Check and get reactive goal param
 		std::string topic_reactive_goal = "/reactive_nav_goal";
 		m_localnh.param("topic_relative_nav_goal", topic_reactive_goal,topic_reactive_goal);
+		// Get publisher on reactive goal topic
 		m_goal_pub = m_nh.advertise<geometry_msgs::PoseStamped>(topic_reactive_goal,1);
+		// Get and check target_allowed_distance
 		m_target_allowed_distance = 0.4;
 		m_localnh.param(
 			"target_allowed_distance", m_target_allowed_distance,
 			m_target_allowed_distance);
 		std::string topic_cmd_vel = "cmd_vel";
+		// Check and get topic name where reactive engine will publish vel commands.
 		m_localnh.param("topic_cmd_vel", topic_cmd_vel,topic_cmd_vel);
+		// Subscribe to said topic and vincule callback
 		m_pub_cmd_vel = m_nh.subscribe<const geometry_msgs::Twist&>(topic_cmd_vel, 1,
 			&MyNavigator::velocityCommandCallback, this);
+		// flags initialization
 		m_is_last_waypoint = false;
 		m_is_received_path = false;
 		
