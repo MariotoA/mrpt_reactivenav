@@ -102,8 +102,8 @@ namespace testlib
 		m_localnh.param(
 			"target_allowed_distance", m_target_allowed_distance,
 			m_target_allowed_distance);
-		std::string topic_cmd_vel = "cmd_vel";
 		// Check and get topic name where reactive engine will publish vel commands.
+		std::string topic_cmd_vel = "cmd_vel";
 		m_localnh.param("topic_cmd_vel", topic_cmd_vel,topic_cmd_vel);
 		// Subscribe to said topic and vincule callback
 		m_pub_cmd_vel = m_nh.subscribe<const geometry_msgs::Twist&>(topic_cmd_vel, 1,
