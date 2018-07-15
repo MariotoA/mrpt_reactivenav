@@ -42,6 +42,8 @@ namespace testlib // this namespace will be changed.
 			geometry_msgs::Twist m_cmd_vel;
 			// Constant to access global path.
 			const int WAYPOINT_INDEX = 300; // If it is lower it does not work for me.
+			// Constant minimum vel command values allowed
+			const double MIN_VEL_VALUE = .001; // Less than this is not showed by ReactiveNavEngine debug output.
 			// Costmap received from global planner
 			costmap_2d::Costmap2DROS* m_costmap_ros;
 			// tfListener to be used with cloudpoints
@@ -50,13 +52,14 @@ namespace testlib // this namespace will be changed.
 			double m_target_allowed_distance;
 			bool m_robot_pose_initialized;
 			bool m_is_last_waypoint;
-			bool m_new_navigation;
+			bool m_is_received_path;
 			
 			////////////////////// Methods:
 
 			void velocityCommandCallback(const geometry_msgs::Twist& cmd_vel);
 			bool isWaypointReached();
 			bool isNextWaypointNeeded();
+			bool isGoalReachedPure();
 		public:
 			/**
 			* @brief  Default constructor for the ros wrapper

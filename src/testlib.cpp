@@ -29,30 +29,37 @@ namespace testlib
 
 		if (!m_g_plan.empty() && isNextWaypointNeeded()) 
 		{
-			m_is_last_waypoint = m_g_plan.size() < WAYPOINT_INDEX;
+			m_is_last_waypoint = m_g_plan.size() <= WAYPOINT_INDEX;
 			int ind = m_is_last_waypoint ? m_g_plan.size() - 1 : WAYPOINT_INDEX;
 			m_waypoint=m_g_plan[ind];
-			ROS_INFO("\n\nMyNavigator::sending goal to reactive navigator: Pose[x:%f,y:%f,z:%f]",
+			ROS_INFO("\n\n[MyNavigator::computeVelocityCommands] sending goal to reactive navigator: Pose[x:%f,y:%f,z:%f]",
 			 m_waypoint.pose.position.x,m_waypoint.pose.position.y,m_waypoint.pose.position.z);
 			m_goal_pub.publish(m_waypoint);
+			m_is_received_path = false;
 		}
 
 		cmd_vel = m_cmd_vel;
 
-		return cmd_vel.linear.x >= .001 || cmd_vel.angular.z >= .001;
+		return isGoalReachedPure() || cmd_vel.linear.x >= MIN_VEL_VALUE 
+			|| cmd_vel.angular.z >= MIN_VEL_VALUE;
 	};
 
+	bool MyNavigator::isGoalReachedPure()
+	{
+		return m_is_last_waypoint && isWaypointReached();
+	};
+	
 	bool MyNavigator::isGoalReached() 
 	{
 
 		//bool CWaypointsNavigator::checkHasReachedTarget 	( 	const double  	targetDist	) 	const
 		// not protected, will need to find another way.
 		// TODO
-		bool end = m_is_last_waypoint && isWaypointReached();
+		bool end = isGoalReachedPure();
 		if (end)
-			m_is_last_waypoint = false;
-		// Go back to initial state.
+			m_is_last_waypoint = false; // this enables next navigation.
 		return end;
+		
 	};
 		 
 	bool MyNavigator::setPlan(const std::vector<geometry_msgs::PoseStamped>& plan) 
@@ -65,7 +72,7 @@ namespace testlib
 		}
 
 		// Before storing next plan, last goal is stored. It could be that goal was not last pose of path for all globalplanners
-		m_new_navigation = true;
+		m_is_received_path = true;
 		m_g_plan.clear();
 		m_g_plan = plan;
 		return true;
@@ -96,7 +103,7 @@ namespace testlib
 		m_pub_cmd_vel = m_nh.subscribe<const geometry_msgs::Twist&>(topic_cmd_vel, 1,
 			&MyNavigator::velocityCommandCallback, this);
 		m_is_last_waypoint = false;
-		m_new_navigation = false;
+		m_is_received_path = false;
 		
 	};
 	
@@ -124,7 +131,7 @@ namespace testlib
 	
 	bool MyNavigator::isNextWaypointNeeded()
 	{
-		return m_new_navigation || isWaypointReached();
+		return m_is_received_path || isWaypointReached();
 	}
 	
 	void MyNavigator::velocityCommandCallback(const geometry_msgs::Twist& cmd_vel)
