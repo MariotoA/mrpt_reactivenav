@@ -1,7 +1,7 @@
 <library path="lib/libtest_lib">
     <class type="testlib::MyNavigator" base_class_type="nav_core::BaseLocalPlanner">
     <description>
-      A implementation of a local planner using PTGs approach based on configuration parameters.
+      An implementation of a local planner using PTGs approach based on configuration parameters.
     </description>
   </class>
 </library>
