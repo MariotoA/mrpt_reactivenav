@@ -40,11 +40,11 @@ namespace testlib
 
 		cmd_vel = m_cmd_vel;
 
-		return isGoalReachedPure() || cmd_vel.linear.x >= MIN_VEL_VALUE 
+		return isInGoalPosition() || cmd_vel.linear.x >= MIN_VEL_VALUE 
 			|| cmd_vel.angular.z >= MIN_VEL_VALUE;
 	};
 
-	bool MyNavigator::isGoalReachedPure()
+	bool MyNavigator::isInGoalPosition()
 	{
 		return m_is_last_waypoint && isWaypointReached();
 	};
@@ -55,7 +55,11 @@ namespace testlib
 		//bool CWaypointsNavigator::checkHasReachedTarget 	( 	const double  	targetDist	) 	const
 		// not protected, will need to find another way.
 		// TODO
-		bool end = isGoalReachedPure();
+		bool end = isInGoalPosition() &&
+					// Checks if reactive engine is sending null commands.
+					// that way plugin and reactive can stop at the same time.
+					m_cmd_vel.linear.x < MIN_VEL_VALUE &&
+					m_cmd_vel.linear.y < MIN_VEL_VALUE;
 		if (end)
 			m_is_last_waypoint = false; // this enables next navigation.
 		return end;

@@ -59,7 +59,7 @@ namespace testlib // this namespace will be changed.
 			void velocityCommandCallback(const geometry_msgs::Twist& cmd_vel);
 			bool isWaypointReached();
 			bool isNextWaypointNeeded();
-			bool isGoalReachedPure();
+			bool isInGoalPosition();
 		public:
 			/**
 			* @brief  Default constructor for the ros wrapper
