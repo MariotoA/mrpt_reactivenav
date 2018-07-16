@@ -175,4 +175,4 @@ robotBase( pose [ -3.75 2.17 0.000 0.000 ] name "SimRobot" color "orange")
 # 2 3 <- initial
 #-3.75 2.17 <- between the "chairs"
 chair (pose [-3.78 1.47 0.0 90 ] name "ObstacleChair0" color "red")
-chair (pose [-3.78 2.85 0.0 90 ] name "ObstacleChair1" color "red")
+chair (pose [-3.78 2.81 0.0 90 ] name "ObstacleChair1" color "red")
