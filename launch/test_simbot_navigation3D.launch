@@ -9,7 +9,7 @@
     ### ROBOT SIMULATION ###
     <param name="use_sim_time" value="true" />
     <include file="$(find tfg_reactive_pkg)/launch/simbot_stage.launch" >
-        <arg name="world_file" value="-d $(find mrpt_reactivenav)/maps/MAPIRlab_furniture.world" />
+        <arg name="world_file" value="-d $(find mrpt_reactivenav)/maps/MAPIRlab_furniture_3D.world" />
         <arg name="disable_odometry" value="false" />
     </include>      
     
@@ -22,7 +22,7 @@
     
     ### NAVIGATION ###
     <include file="$(find tfg_reactive_pkg)/launch/simbot_map_server.launch">
-        <arg name="map_file" value="$(find tfg_reactive_pkg)/maps/MAPIRlab_furniture.yaml" />
+        <arg name="map_file" value="$(find mrpt_reactivenav)/maps/MAPIRlab_furniture_3D.yaml" />
     </include>
     <include file="$(find mrpt_reactivenav)/launch/simbot_move_base.launch" />
     <include file="$(find tfg_reactive_pkg)/launch/simbot_fake_loc.launch" />

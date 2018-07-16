@@ -5,21 +5,22 @@
 
     ### ROBOT SIMULATION ###
     <param name="use_sim_time" value="true" />
-    <include file="$(find tfg_reactive_pkg)/launch/simbot_stage.launch" >
-        <arg name="world_file" value="-d $(find mrpt_reactivenav)/maps/MAPIRlab_furniture.world" />
+    <include file="$(find mrpt_reactivenav)/launch/simbot_stage.launch" >
+        <arg name="world_file" value="-d $(find mrpt_reactivenav)/maps/MAPIRlab_furniture_3D.world" />
         <arg name="disable_odometry" value="false" />
+		<param name="/stage_ros/laser_frame_id" value="laser_stage"/>
     </include>      
 
     ### NAVIGATION ###
     <include file="$(find tfg_reactive_pkg)/launch/simbot_map_server.launch">
-        <arg name="map_file" value="$(find mrpt_reactivenav)/maps/MAPIRlab_furniture.yaml" />
+        <arg name="map_file" value="$(find mrpt_reactivenav)/maps/MAPIRlab_furniture_3D.yaml" />
     </include>
     <include file="$(find tfg_reactive_pkg)/launch/simbot_fake_loc.launch" />
         	<!-- Node: Local obstacles builder -->
 	<node pkg="mrpt_local_obstacles" type="mrpt_local_obstacles_node" name="mrpt_local_obstacles_node" output="screen">
-		<param name="source_topics_2dscan" value="laser_scan"/>
+		<param name="source_topics_2dscan" value="laser_scan_0, laser_scan_1"/>
 		<param name="show_gui" value="false"/>
-		<rosparam param="robot_heights"> [0.24, 0.69, 1.2, 1.71]</rosparam>
+		<!--<rosparam param="robot_heights"> [0.24, 0.69, 1.2, 1.71]</rosparam>-->
 		<!-- <param name="time_window" value="5"/>-->
 	</node>
 	

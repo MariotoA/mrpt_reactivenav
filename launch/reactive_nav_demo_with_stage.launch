@@ -18,7 +18,7 @@
         	<!-- Node: Local obstacles builder -->
 	<node pkg="mrpt_local_obstacles" type="mrpt_local_obstacles_node" name="mrpt_local_obstacles_node" output="screen">
 		<param name="source_topics_2dscan" value="laser_scan"/>
-		<param name="show_gui" value="false"/>
+		<param name="show_gui" value="true"/>
 		 <!--<param name="time_window" value="5"/> -->
 	</node>
 	
