@@ -8,7 +8,6 @@
     <include file="$(find mrpt_reactivenav)/launch/simbot_stage.launch" >
         <arg name="world_file" value="-d $(find mrpt_reactivenav)/maps/MAPIRlab_furniture_3D.world" />
         <arg name="disable_odometry" value="false" />
-		<param name="/stage_ros/laser_frame_id" value="laser_stage"/>
     </include>      
 
     ### NAVIGATION ###
@@ -47,7 +46,6 @@
 		<param name="topic_robot_shape" value="/chassis_polygon" />
 
 	</node>
-    <node pkg="keyboard_control" type="keyboard_control" name="keyboard_control" />
     ### RVIZ ###
     <node name="rviz_player" pkg="rviz" type="rviz" args="-d $(find tfg_reactive_pkg)/rviz/simbot_reactive_only.rviz"/>
 

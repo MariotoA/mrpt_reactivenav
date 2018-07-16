@@ -67,10 +67,31 @@ define CameraFront camera          # RGB camera
   size [ 0.050 0.050 0.100 ]
 )
 
+define chair model
+(
+	size [1 1 4]
+  	origin [0.00 0.000 0.000 0.000]
+	block ( points 4
+		point[0] [0.500 0.100]
+		point[1] [0.500 -0.100]
+		point[2] [-0.500 -0.100]
+		point[3] [-0.500 0.100]
+		z [0.8 4]
+	
+	)
+	block ( points 4
+		point[0] [0.100 0.100]
+		point[1] [0.100 -0.100]
+		point[2] [-0.100 -0.100]
+		point[3] [-0.100 0.100]
+		z [0 0.8]
+	
+	)
+)
 
 define robotBase position      # Mobile robot base.
 (
-  size [0.45 0.45 1.0]
+  size [0.45 0.45 1.50]
   origin [0.00 0.000 0.000 0.000]
   gui_nose 1
   drive "diff"
@@ -110,7 +131,7 @@ define robotBase position      # Mobile robot base.
   # Add a laser
   LaserFront(pose [ 0.10 0.000 -0.500 0.000 ])    #pose in its parent's coordinate system
   # Add a laser
-  LaserFront(pose [ 0.225 0.000 -0.850 0.000 ])    #pose in its parent's coordinate system
+  LaserFront(pose [ 0.210 0.000 -1.25 0.000 ])    #pose in its parent's coordinate system
   
   #Add a camera
   #CameraFront(pose [ -0.20 0.000 0.6 0.000 ])    #pose in its parent's coordinate system
@@ -150,5 +171,8 @@ floorMap                     # load an environment bitmap
 )
 
 # throw in a robot
-robotBase( pose [ 2.0 3.0 0.000 0.000 ] name "SimRobot" color "orange")
-
+robotBase( pose [ -3.75 2.17 0.000 0.000 ] name "SimRobot" color "orange")
+# 2 3 <- initial
+#-3.75 2.17 <- between the "chairs"
+chair (pose [-3.78 1.47 0.0 90 ] name "ObstacleChair0" color "red")
+chair (pose [-3.78 2.85 0.0 90 ] name "ObstacleChair1" color "red")

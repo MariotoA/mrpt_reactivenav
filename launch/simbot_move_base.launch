@@ -8,20 +8,21 @@
   <arg name="launch_prefix" default="" />
   <arg name="global_planner_plugin" default="navfn/NavfnROS" />
   <arg name="local_planner_plugin" default="testlib::MyNavigator"/>
-
+  <arg name="nav_type" default="2D"/>
+  <arg name="config_reactive_file" default="$(find mrpt_reactivenav)/tutorial/reactive2d_custom_config.ini"/>
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" launch-prefix="$(arg launch_prefix)" output="screen">
 		
 		## BaseLocalPlanner mrpt controller config files and params.
 		# The plugin itself, name defined in said argument.
 		<param name="base_local_planner" value="$(arg local_planner_plugin)"/>
 		# Set type of reactive navigator (2D or 3D)
-		<param name="nav_type" value="2D"/> 
+		<param name="nav_type" value="$(arg nav_type)"/> 
 		# This sends the distance to the target used by mrpt_reactivenav
 		<param name="target_allowed_distance" value="0.1"/>
 		# Topic to subscribe to get reactive goals (waypoints)
 		<param name="topic_relative_nav_goal" value="reactive_nav_goal"/>
 		# *Important*: This external config file holds the most important navigation settings
-		<param name="cfg_file_reactive" value="$(find mrpt_reactivenav)/tutorial/reactive2d_custom_config.ini"/>
+		<param name="cfg_file_reactive" value="$(arg config_reactive_file)"/>
 		# Topic to subscribe to get robot shape.
 		<param name="topic_robot_shape" value="/chassis_polygon" />
 		# Rate base_local_planner calls its methods.
