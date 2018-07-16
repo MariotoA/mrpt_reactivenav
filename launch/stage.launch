@@ -1,0 +1,9 @@
+<!-- Launch file principal para lanzar una simulación con Stage + MoveBse -->
+<launch>   
+	<include file="$(find mrpt_reactivenav)/launch/simbot_stage.launch" >
+        <arg name="world_file" value="-d $(find mrpt_reactivenav)/maps/MAPIRlab_furniture_3D.world" />
+        <arg name="disable_odometry" value="false" />
+    </include>   
+	
+    <node pkg="keyboard_control" type="keyboard_control" name="keyboard_control" />
+</launch>
