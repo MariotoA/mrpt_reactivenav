@@ -26,7 +26,7 @@
 		# Topic to subscribe to get robot shape.
 		<param name="topic_robot_shape" value="/chassis_polygon" />
 		# Rate base_local_planner calls its methods.
-		 <param name="controller_frequency" value="10"/> # This solves the "pitching" problem
+		 <param name="controller_frequency" value="15"/> # This solves the "pitching" problem
 		# Topic where the reactive plugin advertise velocity commands. Default is "cmd_vel".		
 		<param name="topic_cmd_vel" value="reactive_nav_cmd_vel"/>
 
