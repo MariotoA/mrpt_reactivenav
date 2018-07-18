@@ -127,7 +127,7 @@ class ReactiveNavNode
 		public mrpt::nav::CRobot2NavInterface
 	{
 		ReactiveNavNode& m_parent;
-
+		bool m_ending_nav = false;
 		MyReactiveInterface(ReactiveNavNode& parent) : m_parent(parent) {}
 		/** Get the current pose and speeds of the robot.
 		 *   \param curPose Current robot pose.
@@ -207,16 +207,30 @@ class ReactiveNavNode
 			geometry_msgs::Twist cmd;
 			cmd.linear.x = v;
 			cmd.angular.z = w;
-			m_parent.m_pub_cmd_vel.publish(cmd);
+			if (v >= 0.001 || w >= 0.001)
+			{
+				m_parent.m_pub_cmd_vel.publish(cmd);
+				m_ending_nav = false;
+			}
 			return true;
 		}
 
 		bool stop(bool isEmergency) override
 		{
-			mrpt::kinematics::CVehicleVelCmd_DiffDriven vel_cmd;
+			/*mrpt::kinematics::CVehicleVelCmd_DiffDriven vel_cmd;
 			vel_cmd.lin_vel = 0;
 			vel_cmd.ang_vel = 0;
-			return changeSpeeds(vel_cmd);
+			*/
+			geometry_msgs::Twist cmd;
+			cmd.linear.x = 0;
+			cmd.angular.z = 0;
+			if (!m_ending_nav) 
+			{
+				m_parent.m_pub_cmd_vel.publish(cmd);
+				m_ending_nav = true;
+			}
+			
+			return true ; //changeSpeeds(vel_cmd);
 		}
 
 		/** Start the watchdog timer of the robot platform, if any.

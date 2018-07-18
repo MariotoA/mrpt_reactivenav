@@ -40,6 +40,7 @@ namespace testlib // this namespace will be changed.
 			geometry_msgs::PoseStamped m_waypoint;
 			// Pointer to current cmd_vel.
 			geometry_msgs::Twist m_cmd_vel;
+			std::vector<geometry_msgs::Twist> m_cmd_vel_queue;
 			// Constant to access global path.
 			const int WAYPOINT_INDEX = 300; // If it is lower it does not work for me.
 			// Constant minimum vel command values allowed
