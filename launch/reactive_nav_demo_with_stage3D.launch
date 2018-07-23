@@ -24,9 +24,9 @@
 	</node>
 	
     <include file="$(find tfg_reactive_pkg)/launch/simbot_urdf.launch" />
-    <node pkg="shape_publisher" type="shape_publisher" name="shape_publisher" output="screen" launch-prefix="xterm -e">
+    <!--<node pkg="shape_publisher" type="shape_publisher" name="shape_publisher" output="screen" launch-prefix="xterm -e">
 	<rosparam file="$(find shape_publisher)/shape_file/giraff.yaml" command="load" />
-    </node>
+    </node>-->
 
 
 	### Node: Pure Reactive Navigator ###
@@ -44,6 +44,8 @@
 		<!-- Enable logs to ~/.ros/reactivenav.logs , use navlog-viewer to open them -->
 <!--		<param name="save_nav_log" value="true"/> -->
 		<param name="topic_robot_shape" value="/chassis_polygon" />
+		
+		<rosparam command="load" file="$(find shape_publisher)/shape_file/giraff3D.yaml" />
 
 	</node>
     ### RVIZ ###

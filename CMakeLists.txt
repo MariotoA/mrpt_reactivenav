@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   visualization_msgs
   pluginlib
   nav_core
+  shape_publisher
 )
 
 ## System dependencies are found with CMake's conventions

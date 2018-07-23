@@ -74,6 +74,7 @@ using namespace mrpt::utils;
 
 #include <mutex>
 
+#include "shape_publisher3D.h"
 
 // The ROS node
 class ReactiveNavNode
@@ -343,7 +344,7 @@ class ReactiveNavNode
 
 		// Init this subscriber first so we know asap the desired robot shape,
 		// if provided via a topic:
-		if (!m_sub_topic_robot_shape.empty())
+		if (!m_sub_topic_robot_shape.empty() && nav_type == "2D")
 		{
 			m_sub_robot_shape = m_nh.subscribe<geometry_msgs::Polygon>(
 				m_sub_topic_robot_shape, 1,
@@ -355,6 +356,13 @@ class ReactiveNavNode
 			ros::Duration(3.0).sleep();
 			for (size_t i = 0; i < 100; i++) ros::spinOnce();
 			ROS_INFO("Wait done.");
+		} else if (!m_sub_topic_robot_shape.empty())
+		{
+			mrpt::nav::TRobotShape rob;
+			if (shape::getTRobotShape(rob,m_localn))
+				onRosSetRobotShape3D(rob);
+			else
+				ROS_INFO("Could not read 3D shape");
 		}
 
 		// Init ROS publishers:
@@ -494,6 +502,20 @@ class ReactiveNavNode
                         rns2D->changeRobotShape(poly);
                     }
                 }
+	}
+	void onRosSetRobotShape3D(const mrpt::nav::TRobotShape& newShape)
+	{
+		ROS_INFO_STREAM("[onRosSetRobotShape3D] Robot shape received via params");
+		CReactiveNavigationSystem3D* rns3D = dynamic_cast<CReactiveNavigationSystem3D*>(m_reactive_nav_engine.get());
+		if (rns3D)
+		{
+			{
+				std::lock_guard<std::mutex> csl(m_reactive_nav_engine_cs);
+                rns3D->changeRobotShape(newShape);
+            }
+		}
+			
+			
 	}
 
 };  // end class
