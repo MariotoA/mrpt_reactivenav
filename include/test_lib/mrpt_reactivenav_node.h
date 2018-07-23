@@ -127,6 +127,7 @@ class ReactiveNavNode
 		public mrpt::nav::CRobot2NavInterface
 	{
 		ReactiveNavNode& m_parent;
+		geometry_msgs::Twist m_cmd;
 
 		MyReactiveInterface(ReactiveNavNode& parent) : m_parent(parent) {}
 		/** Get the current pose and speeds of the robot.
@@ -204,10 +205,10 @@ class ReactiveNavNode
 			ROS_DEBUG(
 				"changeSpeeds: v=%7.4f m/s  w=%8.3f deg/s", v,
 				w * 180.0f / M_PI);
-			geometry_msgs::Twist cmd;
-			cmd.linear.x = v;
-			cmd.angular.z = w;
-			m_parent.m_pub_cmd_vel.publish(cmd);
+			
+			m_cmd.linear.x = v;
+			m_cmd.angular.z = w;
+			//m_parent.m_pub_cmd_vel.publish(cmd);
 			return true;
 		}
 
@@ -374,10 +375,10 @@ class ReactiveNavNode
 
 		// Init timers:
 		// ----------------------------------------------------
-		m_timer_run_nav = m_nh.createTimer(
+		/*m_timer_run_nav = m_nh.createTimer(
 			ros::Duration(m_nav_period), &ReactiveNavNode::onDoNavigation,
-			this);
-
+			this);*/
+		onDoNavigation();
 	}  // end ctor
 
 	/**
@@ -411,9 +412,12 @@ class ReactiveNavNode
 			m_reactive_nav_engine->navigate(&navParams);
 		}
 	}
-
+	void getCurrentVelocityCommand(geometry_msgs::Twist& cmd)
+	{
+		cmd = m_reactive_if.m_cmd;
+	}
 	/** Callback: On run navigation */
-	void onDoNavigation(const ros::TimerEvent&)
+	void onDoNavigation(/*const ros::TimerEvent&*/)
 	{
 		// 1st time init:
 		// ----------------------------------------------------

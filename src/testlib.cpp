@@ -38,7 +38,8 @@ namespace testlib
 			m_is_received_path = false;
 		}
 
-		cmd_vel = m_cmd_vel;
+		m_reactive->onDoNavigation();
+		m_reactive->getCurrentVelocityCommand(cmd_vel);
 
 		return isInGoalPosition() || cmd_vel.linear.x >= MIN_VEL_VALUE 
 			|| cmd_vel.angular.z >= MIN_VEL_VALUE;
@@ -55,11 +56,7 @@ namespace testlib
 		//bool CWaypointsNavigator::checkHasReachedTarget 	( 	const double  	targetDist	) 	const
 		// not protected, will need to find another way.
 		// TODO
-		bool end = isInGoalPosition() &&
-					// Checks if reactive engine is sending null commands.
-					// that way plugin and reactive can stop at the same time.
-					m_cmd_vel.linear.x < MIN_VEL_VALUE &&
-					m_cmd_vel.linear.y < MIN_VEL_VALUE;
+		bool end = isInGoalPosition();
 		if (end)
 			m_is_last_waypoint = false; // this enables next navigation.
 		return end;
@@ -106,12 +103,6 @@ namespace testlib
 		m_localnh.param(
 			"target_allowed_distance", m_target_allowed_distance,
 			m_target_allowed_distance);
-		// Check and get topic name where reactive engine will publish vel commands.
-		std::string topic_cmd_vel = "cmd_vel";
-		m_localnh.param("topic_cmd_vel", topic_cmd_vel,topic_cmd_vel);
-		// Subscribe to said topic and vincule callback
-		m_pub_cmd_vel = m_nh.subscribe<const geometry_msgs::Twist&>(topic_cmd_vel, 1,
-			&MyNavigator::velocityCommandCallback, this);
 		// flags initialization
 		m_is_last_waypoint = false;
 		m_is_received_path = false;
@@ -143,11 +134,6 @@ namespace testlib
 	bool MyNavigator::isNextWaypointNeeded()
 	{
 		return m_is_received_path || isWaypointReached();
-	}
-	
-	void MyNavigator::velocityCommandCallback(const geometry_msgs::Twist& cmd_vel)
-	{
-		m_cmd_vel = cmd_vel;
 	}
 };
 

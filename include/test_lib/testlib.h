@@ -31,15 +31,12 @@ namespace testlib // this namespace will be changed.
 			ros::NodeHandle m_nh;
 			ros::NodeHandle m_localnh{"~"}; // this way it initializes non const static attributes.
 			ros::Publisher m_goal_pub;
-			ros::Subscriber m_pub_cmd_vel;
 			// The global plan sended by move_base.
 			std::vector<geometry_msgs::PoseStamped> m_g_plan;
 			// Robot pose. To check if waypoint is reached. TODO. Issue #9
 			tf::Stamped<tf::Pose> m_current_pose;
 			// Current waypoint.
 			geometry_msgs::PoseStamped m_waypoint;
-			// Pointer to current cmd_vel.
-			geometry_msgs::Twist m_cmd_vel;
 			// Constant to access global path.
 			const int WAYPOINT_INDEX = 300; // If it is lower it does not work for me.
 			// Constant minimum vel command values allowed
@@ -55,8 +52,6 @@ namespace testlib // this namespace will be changed.
 			bool m_is_received_path;
 			
 			////////////////////// Methods:
-
-			void velocityCommandCallback(const geometry_msgs::Twist& cmd_vel);
 			bool isWaypointReached();
 			bool isNextWaypointNeeded();
 			bool isInGoalPosition();
