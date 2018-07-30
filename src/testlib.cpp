@@ -37,12 +37,7 @@ namespace testlib
 			m_goal_pub.publish(m_waypoint);
 			m_is_received_path = false;
 		}
-		if (!m_cmd_vel_queue.empty())
-		{
-			m_cmd_vel = m_cmd_vel_queue.front();
-			m_cmd_vel_queue.erase(m_cmd_vel_queue.begin());
-			//m_cmd_vel_queue.pop();
-		}
+
 		cmd_vel = m_cmd_vel;
 
 		return isInGoalPosition() || cmd_vel.linear.x >= MIN_VEL_VALUE 
@@ -67,10 +62,7 @@ namespace testlib
 					m_cmd_vel.linear.y < MIN_VEL_VALUE;
 		if (end)
 		{
-			//std::queue<geometry_msgs::Twist> q;
 			m_is_last_waypoint = false; // this enables next navigation.
-			//q.swap(m_cmd_vel_queue);
-			m_cmd_vel_queue.clear();
 		}
 		return end;
 		
@@ -157,15 +149,7 @@ namespace testlib
 	
 	void MyNavigator::velocityCommandCallback(const geometry_msgs::Twist& cmd_vel)
 	{
-		
-		if (!m_cmd_vel_queue.empty())
-		{
-			geometry_msgs::Twist last = m_cmd_vel_queue.front();
-			if (last.linear.x < 0.001 && last.angular.z < 0.001
-				&& cmd_vel.linear.x < 0.001 && cmd_vel.angular.z < 0.001)
-				return;
-		}
-		m_cmd_vel_queue.push_back( cmd_vel );
+		m_cmd_vel = cmd_vel;
 	}
 };
 
