@@ -274,7 +274,7 @@ class ReactiveNavNode
 			mrpt::kinematics::CVehicleVelCmd_DiffDriven::Ptr ret =
 				mrpt::kinematics::CVehicleVelCmd_DiffDriven::Ptr(
 					new mrpt::kinematics::CVehicleVelCmd_DiffDriven);
-			ROS_INFO("FIN");
+			ROS_INFO("[MyReactiveInterface::getAlignCmd] Called.");
 			if (relative_heading_radians - .01 < 0)
 			{
 				ret->ang_vel =  -0.1;
