@@ -17,10 +17,6 @@
        
     ### URDF model "r2d2" ###
     <include file="$(find tfg_reactive_pkg)/launch/simbot_urdf.launch" />
-
-    <node pkg="shape_publisher" type="shape_publisher" name="shape_publisher" output="screen" launch-prefix="xterm -e">
-		<rosparam file="$(find shape_publisher)/shape_file/giraff.yaml" command="load" />
-    </node>
     
     ### NAVIGATION ###
     <include file="$(find tfg_reactive_pkg)/launch/simbot_map_server.launch">

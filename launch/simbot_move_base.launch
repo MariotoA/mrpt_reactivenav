@@ -11,6 +11,12 @@
   <arg name="nav_type" default="2D"/>
   <arg name="config_reactive_file" default="$(find mrpt_reactivenav)/tutorial/reactive2d_custom_config.ini"/>
   <arg name="shape3D_file" default="" />
+
+
+  <node pkg="shape_publisher" type="shape_publisher" name="shape_publisher" output="screen" launch-prefix="xterm -e" 
+		unless="$(eval nav_type == '3D')">
+				<rosparam file="$(find shape_publisher)/shape_file/giraff.yaml" command="load" />
+  </node>
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" launch-prefix="$(arg launch_prefix)" output="screen">
 		
 		## BaseLocalPlanner mrpt controller config files and params.
@@ -30,7 +36,8 @@
 		 <param name="controller_frequency" value="10"/> # This solves the "pitching" problem
 		# Topic where the reactive plugin advertise velocity commands. Default is "cmd_vel".		
 		<param name="topic_cmd_vel" value="reactive_nav_cmd_vel"/>
-		<rosparam file="$(arg shape3D_file)" command="load" />
+		### if navigation is 3D
+		<rosparam file="$(arg shape3D_file)" command="load" if="$(eval nav_type == '3D')" />
 		## Global planner config
 		<param name="base_global_planner" value="$(arg global_planner_plugin)"/>
 		# Planners

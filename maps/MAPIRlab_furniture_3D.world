@@ -89,6 +89,36 @@ define chair model
 	)
 )
 
+define tableLeg model
+(
+	size [0.5 0.5 0.8]
+	block ( points 4
+		point[0] [0.100 0.100]
+		point[1] [0.100 -0.100]
+		point[2] [-0.100 -0.100]
+		point[3] [-0.100 0.100]
+		z [0 1]
+	
+	)
+
+)
+
+define table model
+(
+	size [0.5 2.5 0.8]
+	block ( points 4
+		point[0] [0.100 0.100]
+		point[1] [0.100 -0.100]
+		point[2] [-0.100 -0.100]
+		point[3] [-0.100 0.100]
+		z [0 1]
+	
+	)
+
+)
+
+
+
 define robotBase position      # Mobile robot base.
 (
   size [0.45 0.45 1.50]
@@ -174,7 +204,10 @@ floorMap                     # load an environment bitmap
 robotBase( pose [ -3.75 2.17 0.000 0.000 ] name "SimRobot" color "orange")
 # 2 3 <- initial
 #-3.75 2.17 <- between the "chairs"
-chair (pose [-3.78 1.47 0.0 90 ] name "ObstacleChair0" color "red")
-chair (pose [-3.78 2.81 0.0 90 ] name "ObstacleChair1" color "red")
+#chair (pose [-3.78 1.47 0.0 90 ] name "ObstacleChair0" color "red")
+#chair (pose [-3.78 2.81 0.0 90 ] name "ObstacleChair1" color "red")
+tableLeg (pose [-3 3.13 0.0 90 ] name "LeftTableLeg" color "red")
+tableLeg (pose [-1.4 3.13 0.0 90 ] name "RightTableLeg" color "red")
+table (pose [-2.2 3.13 0.8 90 ] name "Table" color "red")
 #chair (pose [-0.36 5.00 0.0 90 ] name "ObstacleChair0" color "red")
 #chair (pose [-0.33 3.57 0.0 90 ] name "ObstacleChair1" color "red")

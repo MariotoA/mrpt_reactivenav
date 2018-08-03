@@ -268,10 +268,26 @@ class ReactiveNavNode
 			return ret;
 		}
 
-		virtual void sendNavigationStartEvent() {}//TODO i guess
+		mrpt::kinematics::CVehicleVelCmd::Ptr getAlignCmd(const double relative_heading_radians)
+		override
+		{
+			mrpt::kinematics::CVehicleVelCmd_DiffDriven::Ptr ret =
+				mrpt::kinematics::CVehicleVelCmd_DiffDriven::Ptr(
+					new mrpt::kinematics::CVehicleVelCmd_DiffDriven);
+			ROS_INFO("FIN");
+			if (relative_heading_radians - .01 < 0)
+			{
+				ret->ang_vel =  -0.1;
+			} else if (relative_heading_radians + .01 > 0)
+			{
+				ret->ang_vel = 0.1;
+			}
+			return ret;
+		}
+		/*virtual void sendNavigationStartEvent() {}//TODO i guess
 		virtual void sendNavigationEndEvent() {}
 		virtual void sendNavigationEndDueToErrorEvent() {}
-		virtual void sendWaySeemsBlockedEvent() {}
+		virtual void sendWaySeemsBlockedEvent() {}*/
 	};
 
 	MyReactiveInterface m_reactive_if;
