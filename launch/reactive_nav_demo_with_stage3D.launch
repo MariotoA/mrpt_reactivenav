@@ -35,7 +35,8 @@
 		<param name="nav_type" value="3D"/> 
 
 		<!-- *Important*: This external config file holds the most important navigation settings -->
-		<param name="cfg_file_reactive" value="$(find mrpt_reactivenav)/tutorial/reactive3d_config.ini"/>
+		<param name="cfg_file_reactive" value="$(find mrpt_reactivenav)/tutorial/reactive3d_custom_config.ini"/>
+		<!-- <param name="cfg_file_reactive" value="$(find mrpt_reactivenav)/tutorial/reactive3d_config.ini"/> -->
 		<!--<param name="cfg_file_reactive" value="$(find mrpt_reactivenav)/tutorial/reactive3d_config.ini"/>  -->
 
 		<!-- This is to allow the reactive responsive to RVIZ GUI commands -->

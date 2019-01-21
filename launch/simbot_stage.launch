@@ -6,7 +6,7 @@
 --> 
 
 <launch>
-  <arg name="world_file" default="-d $(find missions_pkg)/stage/UMA_236.world" />
+  <arg name="world_file" default="" />
   <arg name="disable_odometry" default="false" />           # by default publish the odometry over TF and as a topic
   
   <node pkg="stage_ros" type="stageros" name="stage_ros" respawn="false" output="screen" args="$(arg world_file)" >
