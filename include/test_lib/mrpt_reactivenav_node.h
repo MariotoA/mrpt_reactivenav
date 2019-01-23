@@ -75,7 +75,7 @@ using namespace mrpt::utils;
 #include <mutex>
 
 #include "shape_publisher3D.h"
-
+#include <mrpt/nav/reactive/TWaypoint.h>
 // The ROS node
 class ReactiveNavNode
 {
@@ -274,7 +274,7 @@ class ReactiveNavNode
 			mrpt::kinematics::CVehicleVelCmd_DiffDriven::Ptr ret =
 				mrpt::kinematics::CVehicleVelCmd_DiffDriven::Ptr(
 					new mrpt::kinematics::CVehicleVelCmd_DiffDriven);
-			ROS_INFO("[MyReactiveInterface::getAlignCmd] Called.");
+			ROS_INFO("\n\n[MyReactiveInterface::getAlignCmd] Called.\n\n");
 			if (relative_heading_radians - .01 < 0)
 			{
 				ret->ang_vel =  -0.1;
@@ -474,7 +474,7 @@ class ReactiveNavNode
 		m_reactive_nav_engine->navigationStep();
 	}
 	
-	void onRosGoalReceived(const geometry_msgs::PoseStampedConstPtr& trg_ptr)
+	void onRosGoalReceived(const geometry_msgs::PoseStampedConstPtr& trg_ptr) // TODO
 	{
 		geometry_msgs::PoseStamped trg = *trg_ptr;
 		ROS_INFO(
@@ -498,9 +498,18 @@ class ReactiveNavNode
 				return;
 			}
 		}
-
-		this->navigateTo(mrpt::math::TPose2D(
-			trg.pose.position.x, trg.pose.position.y, trg.pose.orientation.z));
+			//TODO
+			mrpt::nav::TWaypointSequence msg;
+			mrpt::nav::TWaypoint single_waypoint(trg.pose.position.x, trg.pose.position.y, m_target_allowed_distance,
+					 false, trg.pose.orientation.z);
+			msg.waypoints.push_back(single_waypoint);
+			mrpt::nav::TWaypoint snd_waypoint(trg.pose.position.x-1, trg.pose.position.y, m_target_allowed_distance,
+					 false, trg.pose.orientation.z);
+			msg.waypoints.push_back(snd_waypoint);
+			std::lock_guard<std::mutex> csl(m_reactive_nav_engine_cs);
+			m_reactive_nav_engine->navigateWaypoints(msg);
+		
+		//this->navigateTo(mrpt::math::TPose2D(trg.pose.position.x, trg.pose.position.y, trg.pose.orientation.z));
 	}
 
 	void onRosLocalObstacles(const sensor_msgs::PointCloudConstPtr& obs)

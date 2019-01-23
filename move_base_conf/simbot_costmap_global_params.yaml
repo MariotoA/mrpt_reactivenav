@@ -19,6 +19,7 @@ global_costmap:
 
   obstacles:
     track_unknown_space: true
+    obstacle_range: 2.5
  
   inflation:
     inflation_radius: 0.75

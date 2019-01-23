@@ -57,10 +57,10 @@ define LaserFront ranger          # Infra-red (IR) range sensor
 
 define CameraFront camera          # RGB camera
 (
-  resolution [640 480]   #width,height (px)
+  resolution [80 60]  #[640 480]   #width,height (px)
   range [0.2 2.8]        #(m) min, max
   fov [ 100.0 100.0 ]    #horizonal, vertical
-  pantilt [ 0.0 45.0 ]   #degrees
+  pantilt [ 0.0 0.0 ]   #degrees
   
   # generic model properties
   color "red"
@@ -145,7 +145,7 @@ define robotBase position      # Mobile robot base.
     point[13] [ 0.086 -0.208 ]
     point[14] [ 0.159 -0.159 ]
     point[15] [ 0.208 -0.086 ]
-    z [0 1] # This is the block's height interval.
+    z [0 0.33] # This is the block's height interval.
   )
   
 	block ( points 4
@@ -153,7 +153,7 @@ define robotBase position      # Mobile robot base.
 		point[1] [0.100 -0.100]
 		point[2] [-0.100 -0.100]
 		point[3] [-0.100 0.100]
-		z [1 3]
+		z [0.33 1]
 	)
 
 
@@ -164,7 +164,7 @@ define robotBase position      # Mobile robot base.
   LaserFront(pose [ 0.210 0.000 -1.25 0.000 ])    #pose in its parent's coordinate system
   
   #Add a camera
-  #CameraFront(pose [ -0.20 0.000 0.6 0.000 ])    #pose in its parent's coordinate system
+  CameraFront(pose [ -0.20 0.000 0.6 0.000 ])    #pose in its parent's coordinate system
   
   #LOCALIZATION
   # Report error-free position in world coordinates
