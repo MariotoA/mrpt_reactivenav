@@ -447,6 +447,13 @@ class ReactiveNavNode
 		{
 			std::lock_guard<std::mutex> csl(m_reactive_nav_engine_cs);
 			m_reactive_nav_engine->navigate(&navParams);
+/*
+			mrpt::nav::TWaypointSequence msg;
+			mrpt::nav::TWaypoint single_waypoint(target.x, target.y, m_target_allowed_distance,
+					 false, target.phi);
+			msg.waypoints.push_back(single_waypoint);
+			std::lock_guard<std::mutex> csl(m_reactive_nav_engine_cs);
+			m_reactive_nav_engine->navigateWaypoints(msg);*/
 		}
 	}
 
@@ -498,18 +505,7 @@ class ReactiveNavNode
 				return;
 			}
 		}
-			//TODO
-			mrpt::nav::TWaypointSequence msg;
-			mrpt::nav::TWaypoint single_waypoint(trg.pose.position.x, trg.pose.position.y, m_target_allowed_distance,
-					 false, trg.pose.orientation.z);
-			msg.waypoints.push_back(single_waypoint);
-			mrpt::nav::TWaypoint snd_waypoint(trg.pose.position.x-1, trg.pose.position.y, m_target_allowed_distance,
-					 false, trg.pose.orientation.z);
-			msg.waypoints.push_back(snd_waypoint);
-			std::lock_guard<std::mutex> csl(m_reactive_nav_engine_cs);
-			m_reactive_nav_engine->navigateWaypoints(msg);
-		
-		//this->navigateTo(mrpt::math::TPose2D(trg.pose.position.x, trg.pose.position.y, trg.pose.orientation.z));
+			this->navigateTo(mrpt::math::TPose2D(trg.pose.position.x, trg.pose.position.y, trg.pose.orientation.z));
 	}
 
 	void onRosLocalObstacles(const sensor_msgs::PointCloudConstPtr& obs)
