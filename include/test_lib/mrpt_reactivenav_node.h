@@ -117,9 +117,8 @@ class ReactiveNavNode
 	std::string nav_type="";
 
 	bool m_save_nav_log;
-
+	bool TEST = true; int TESTCONT = 0; //TODO
 	ros::Timer m_timer_run_nav;
-
 	CSimplePointsMap m_last_obstacles;
 	std::mutex m_last_obstacles_cs;
 
@@ -176,7 +175,7 @@ class ReactiveNavNode
 
 			curV = curW = 0;
 			MRPT_TODO("Retrieve current speeds from odometry");
-			ROS_DEBUG(
+			ROS_INFO(
 				"[getCurrentPoseAndSpeeds] Latest pose: %s",
 				curPose.asString().c_str());
 
@@ -208,7 +207,7 @@ class ReactiveNavNode
 			geometry_msgs::Twist cmd;
 			cmd.linear.x = v;
 			cmd.angular.z = w;
-			if (v >= 0.001 || w >= 0.001)
+			//if (v >= 0.001 || w >= 0.001)
 			{
 				m_parent.m_pub_cmd_vel.publish(cmd);
 				m_ending_nav = false;
@@ -277,10 +276,10 @@ class ReactiveNavNode
 			ROS_INFO("\n\n[MyReactiveInterface::getAlignCmd] Called.\n\n");
 			if (relative_heading_radians - .01 < 0)
 			{
-				ret->ang_vel =  -0.1;
+				ret->ang_vel =  -0.5;
 			} else if (relative_heading_radians + .01 > 0)
 			{
-				ret->ang_vel = 0.1;
+				ret->ang_vel = 0.5;
 			}
 			return ret;
 		}
@@ -427,33 +426,61 @@ class ReactiveNavNode
 		ROS_INFO(
 			"[navigateTo] Starting navigation to %s",
 			target.asString().c_str());
-
+		
 		CAbstractPTGBasedReactive::TNavigationParamsPTG navParams;
-		CAbstractNavigator::TargetInfo target_info;
-		target_info.target_coords.x = target.x;
-		target_info.target_coords.y = target.y;
+		CAbstractNavigator::TargetInfo target_info, target_info_mult;
+		target_info.target_coords.x = target_info_mult.target_coords.x = target.x;
+		target_info.target_coords.y = target_info_mult.target_coords.y = target.y;
 		// Added to test
-		target_info.target_coords.phi = target.phi;
-
+		target_info.target_coords.phi = target_info_mult.target_coords.phi = target.phi;
+		ROS_INFO("navigateTo :: TARGET_INFO = %s, safeDist= %f", target.asString().c_str(), m_target_allowed_distance);
 		//
-		target_info.targetAllowedDistance = m_target_allowed_distance;
-		target_info.targetIsRelative = false;
+		target_info.targetAllowedDistance  = target_info_mult.targetAllowedDistance = m_target_allowed_distance;
+		target_info.targetIsRelative = target_info_mult.targetIsRelative = false;
 
-		navParams.multiple_targets.push_back(target_info);
-
+		navParams.multiple_targets.push_back(target_info_mult);
+		//navParams.target = target_info;
 		// Optional: restrict the PTGs to use
 		// navParams.restrict_PTG_indices.push_back(1);
 
 		{
 			std::lock_guard<std::mutex> csl(m_reactive_nav_engine_cs);
 			m_reactive_nav_engine->navigate(&navParams);
-/*
+			/*
+			std::lock_guard<std::mutex> csl(m_reactive_nav_engine_cs);
+			//if (TEST) 
+			if (target.phi != 0)
+			{
+			
+			ROS_INFO("[navigateTo]::TESTCONT= %d", TESTCONT);
+			TEST = false;
 			mrpt::nav::TWaypointSequence msg;
 			mrpt::nav::TWaypoint single_waypoint(target.x, target.y, m_target_allowed_distance,
 					 false, target.phi);
 			msg.waypoints.push_back(single_waypoint);
-			std::lock_guard<std::mutex> csl(m_reactive_nav_engine_cs);
-			m_reactive_nav_engine->navigateWaypoints(msg);*/
+			m_reactive_nav_engine->navigateWaypoints(msg);
+			msg.clear();
+			}	else {
+				m_reactive_nav_engine->navigate(&navParams);
+			}		
+			TESTCONT++;
+
+			mrpt::math::TPose2D curPose;
+			mrpt::math::TTwist2D curVel;
+			mrpt::system::TTimeStamp timestamp;
+			mrpt::math::TPose2D curOdometry; 
+			std::string frame_id;
+			m_reactive_if.getCurrentPoseAndSpeeds(
+			curPose, curVel,timestamp,curOdometry, frame_id);
+			const mrpt::math::TSegment2D seg_robot_mov = mrpt::math::TSegment2D(
+			mrpt::math::TPoint2D(curPose),
+			mrpt::math::TPoint2D(curPose));
+			const double targetDist = seg_robot_mov.distance(
+			mrpt::math::TPoint2D(navParams.target.target_coords));
+			ROS_INFO("\n\n\n\n\n\n\n\n\n\n\n targetDist = %f \n %s \n\n\n\n\n\n\n\n\n\n", targetDist,mrpt::math::TPoint2D(navParams.target.target_coords).asString().c_str());
+
+
+*/
 		}
 	}
 
@@ -505,7 +532,13 @@ class ReactiveNavNode
 				return;
 			}
 		}
-			this->navigateTo(mrpt::math::TPose2D(trg.pose.position.x, trg.pose.position.y, trg.pose.orientation.z));
+			double yaw_angle = tf::getYaw(trg.pose.orientation);
+			ROS_INFO("[onRosGoalReceived]:: yaw_angle=%f", yaw_angle);
+
+
+
+
+			this->navigateTo(mrpt::math::TPose2D(trg.pose.position.x, trg.pose.position.y, yaw_angle));
 	}
 
 	void onRosLocalObstacles(const sensor_msgs::PointCloudConstPtr& obs)

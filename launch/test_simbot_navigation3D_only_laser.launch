@@ -1,0 +1,20 @@
+<!-- Launch file principal para lanzar una simulación con Stage + MoveBse -->
+
+<launch>    
+
+    <node pkg="mrpt_local_obstacles" type="mrpt_local_obstacles_node" name="mrpt_local_obstacles_node" output="screen">
+		<param name="source_topics_2dscan" value="laser_scan"/>
+		<param name="show_gui" value="false"/>
+    </node>
+    ### URDF model "r2d2" ###
+    <include file="$(find tfg_reactive_pkg)/launch/simbot_urdf.launch" />
+    
+    ### NAVIGATION ###
+    <include file="$(find mrpt_reactivenav)/launch/simbot_move_base.launch">
+		<arg name="nav_type" value="3D"/>
+		<arg name="config_reactive_file" value="$(find mrpt_reactivenav)/tutorial/reactive3d_custom_config.ini"/>
+		<arg name="shape3D_file" value="$(find shape_publisher)/shape_file/giraff3D.yaml" />
+	</include>
+  
+
+</launch>
