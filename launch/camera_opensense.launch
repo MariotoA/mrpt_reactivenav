@@ -2,11 +2,16 @@
 <launch>
     <!--
     The TF's have been measured by hand. Proper calibration is pending.
+	On lowering camera res:
+	https://answers.ros.org/question/55689/lower-kinect-resolution-for-rgbcamera-using-openni_launch/
     -->
+
+
+
     <arg name="camera" default="camera" />
 	<param name="/$(arg camera)/driver/data_skip" value="10" /> <!-- 0 is default, 10 will drop 9/10 frames -->
-  	<param name="/$(arg camera)/driver/image_mode" value="5" /> <!-- 2 is default -->
-  	<param name="/$(arg camera)/driver/depth_mode" value="5" /> <!-- 2 is default -->
+  	<param name="/$(arg camera)/driver/image_mode" value="8" /> <!-- 2 is default -->
+  	<param name="/$(arg camera)/driver/depth_mode" value="8" /> <!-- 2 is default -->
     <include file="$(find openni2_launch)/launch/openni2.launch">
         <arg name="camera" value="$(arg camera)" />
         <arg name="device_id" value="#1" />
