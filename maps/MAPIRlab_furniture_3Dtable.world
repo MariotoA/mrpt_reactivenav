@@ -51,7 +51,7 @@ define LaserFront ranger          # Infra-red (IR) range sensor
 	
   # generic model properties
   color_rgba [ 0 0 1 0.3 ]
-  size [ 0.05 0.005 0.1 ]
+  size [ 0.050 0.005 0.100 ]
 )
 
 
@@ -103,9 +103,9 @@ define tableLeg model
 
 )
 
-define table model
+define tableLegSlim model
 (
-	size [0.5 2.5 0.8]
+	size [0.100 0.100 0.800]
 	block ( points 4
 		point[0] [0.100 0.100]
 		point[1] [0.100 -0.100]
@@ -117,52 +117,50 @@ define table model
 
 )
 
-
-
-define robotBase position      # Mobile robot base.
+define table model
 (
-  size [0.45 0.45 1.50]
-  origin [0.00 0.000 0.000 0.000]
-  gui_nose 1
-  drive "diff"
-  
-  # This block approximates a circular shape of a Robot
-  # The robot shapes is then a circle scalated to the "size" bounding box
-  block( points 16
-    point[0] [ 0.225 0.000 ]
-    point[1] [ 0.208 0.086 ]
-    point[2] [ 0.159 0.159 ]
-    point[3] [ 0.086 0.208 ]
-    point[4] [ 0.000 0.225 ]
-    point[5] [ -0.086 0.208 ]
-    point[6] [ -0.159 0.159 ]
-    point[7] [ -0.208 0.086 ]
-    point[8] [ -0.225 0.000 ]
-    point[9] [ -0.208 -0.086 ]
-    point[10] [ -0.159 -0.159 ]
-    point[11] [ -0.086 -0.208 ]
-    point[12] [ -0.000 -0.225 ]
-    point[13] [ 0.086 -0.208 ]
-    point[14] [ 0.159 -0.159 ]
-    point[15] [ 0.208 -0.086 ]
-    z [0 0.33] # This is the block's height interval.
-  )
-  
+	size [3.000 2.000 0.200]
 	block ( points 4
 		point[0] [0.100 0.100]
 		point[1] [0.100 -0.100]
 		point[2] [-0.100 -0.100]
 		point[3] [-0.100 0.100]
-		z [0.33 1]
+		z [0 0.2]
+	
 	)
 
+)
 
 
-  # Add a laser
-  LaserFront(pose [ 0.10 0.000 -0.500 0.000 ])    #pose in its parent's coordinate system
-  # Add a laser
-  LaserFront(pose [ 0.210 0.000 -1.25 0.000 ])    #pose in its parent's coordinate system
+
+define robotBase position      # Mobile robot base.
+(
+  size [0.450 0.450 1.500]
+  origin [0.000 0.000 0.000 0.000]
+  gui_nose 1
+  drive "diff"
   
+  # This block approximates a circular shape of a Robot
+  # The robot shapes is then a circle scalated to the "size" bounding box
+  block ( points 4
+		point[0] [0.33 0.33]
+		point[1] [0.33 -0.33]
+		point[2] [-0.33 -0.33]
+		point[3] [-0.33 0.33]
+		z [0 1]
+	)
+
+	
+
+
+
+  # Add a laser
+  LaserFront(pose [ 0.100 0.000 -0.500 0.000 ])    #pose in its parent's coordinate system
+  # Add a laser
+  LaserFront(pose [ 0.210 0.000 -1.250 0.000 ])    #pose in its parent's coordinate system
+  
+  #Add a camera
+  CameraFront(pose [ -0.200 0.000 0.600 0.000 ])    #pose in its parent's coordinate system
   
   #LOCALIZATION
   # Report error-free position in world coordinates
@@ -194,18 +192,20 @@ floorMap                     # load an environment bitmap
   # MAPIRlab_furniture.pgm 1000x1100px
   # resolution 0.01 m/px
   bitmap "./MAPIRlab_furniture.pgm"
-  size [10.0 11.0 3.00]           #m  
-  pose [ 0.0 0.0 0.000 0.000 ]    #Coordinates (m) of the Center of the image_map
+  size [10.000 11.000 3.000]           #m  
+  pose [ 0.000 0.000 0.000 0.000 ]    #Coordinates (m) of the Center of the image_map
 )
 
 # throw in a robot
-robotBase( pose [ -3.75 2.17 0.000 0.000 ] name "SimRobot" color "orange")
+robotBase( pose [ -10.463 3.716 0.000 37.242 ] name "SimRobot" color "orange")
 # 2 3 <- initial
 #-3.75 2.17 <- between the "chairs"
-chair (pose [-3.78 1.47 0.0 90 ] name "ObstacleChair0" color "red")
-chair (pose [-3.78 2.81 0.0 90 ] name "ObstacleChair1" color "red")
-tableLeg (pose [-3 3.13 0.0 90 ] name "LeftTableLeg" color "red")
-tableLeg (pose [-1.4 3.13 0.0 90 ] name "RightTableLeg" color "red")
-table (pose [-2.2 3.13 0.8 90 ] name "Table" color "red")
+#chair (pose [-3.78 1.47 0.0 90 ] name "ObstacleChair0" color "red")
+#chair (pose [-3.78 2.81 0.0 90 ] name "ObstacleChair1" color "red")
+tableLegSlim (pose [-10.186 4.812 0.000 90.000 ] name "LeftTableLeg" color "red")
+tableLegSlim (pose [-8.416 4.812 0.000 90.000 ] name "RightTableLeg" color "red")
+tableLegSlim (pose [-10.186 2.812 0.000 90.000 ] name "LeftTableLeg" color "red")
+tableLegSlim (pose [-8.416 2.812 0.000 90.000 ] name "RightTableLeg" color "red")
+table (pose [-9.267 3.730 0.800 90.000 ] name "Table" color "red")
 #chair (pose [-0.36 5.00 0.0 90 ] name "ObstacleChair0" color "red")
 #chair (pose [-0.33 3.57 0.0 90 ] name "ObstacleChair1" color "red")

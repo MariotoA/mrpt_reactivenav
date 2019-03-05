@@ -32,7 +32,7 @@ define LaserFront ranger          # Infra-red (IR) range sensor
 (
   sensor(
     range [ 0.0  30.0 ]           #min max in [m]
-    fov 360 #270.25                    #deg
+    fov 270.25                    #deg
     samples 1081                  #Num samples
   )
 
@@ -51,16 +51,16 @@ define LaserFront ranger          # Infra-red (IR) range sensor
 	
   # generic model properties
   color_rgba [ 0 0 1 0.3 ]
-  size [ 0.05 0.005 0.1 ]
+  size [ 0.050 0.005 0.100 ]
 )
 
 
 define CameraFront camera          # RGB camera
 (
-  resolution [80 60]  #[640 480]   #width,height (px)
+  resolution [80 60]   #width,height (px)[640 480]
   range [0.2 2.8]        #(m) min, max
-  fov [ 100.0 100.0 ]    #horizonal, vertical
-  pantilt [ 0.0 0.0 ]   #degrees
+  fov [ 100.0 75.0 ]    #horizonal, vertical (100,100)
+  pantilt [ 0.0 45.0 ]   #degrees before 0,45
   
   # generic model properties
   color "red"
@@ -91,7 +91,7 @@ define chair model
 
 define tableLeg model
 (
-	size [0.5 0.5 0.8]
+	size [0.500 0.500 0.800]
 	block ( points 4
 		point[0] [0.100 0.100]
 		point[1] [0.100 -0.100]
@@ -118,51 +118,40 @@ define table model
 )
 
 
-
 define robotBase position      # Mobile robot base.
 (
-  size [0.45 0.45 1.50]
-  origin [0.00 0.000 0.000 0.000]
+  #size [0.45 0.45 1.0]
+  size [0.225 0.225 1.000]
+  origin [0.000 0.000 0.000 0.000]
   gui_nose 1
   drive "diff"
   
   # This block approximates a circular shape of a Robot
   # The robot shapes is then a circle scalated to the "size" bounding box
-  block( points 16
-    point[0] [ 0.225 0.000 ]
-    point[1] [ 0.208 0.086 ]
-    point[2] [ 0.159 0.159 ]
-    point[3] [ 0.086 0.208 ]
-    point[4] [ 0.000 0.225 ]
-    point[5] [ -0.086 0.208 ]
-    point[6] [ -0.159 0.159 ]
-    point[7] [ -0.208 0.086 ]
-    point[8] [ -0.225 0.000 ]
-    point[9] [ -0.208 -0.086 ]
-    point[10] [ -0.159 -0.159 ]
-    point[11] [ -0.086 -0.208 ]
-    point[12] [ -0.000 -0.225 ]
-    point[13] [ 0.086 -0.208 ]
-    point[14] [ 0.159 -0.159 ]
-    point[15] [ 0.208 -0.086 ]
-    z [0 0.33] # This is the block's height interval.
-  )
-  
-	block ( points 4
-		point[0] [0.100 0.100]
-		point[1] [0.100 -0.100]
-		point[2] [-0.100 -0.100]
-		point[3] [-0.100 0.100]
-		z [0.33 1]
-	)
-
-
-
+  #block( points 16
+  #  point[0] [ 0.225 0.000 ]
+  #  point[1] [ 0.208 0.086 ]
+  #  point[2] [ 0.159 0.159 ]
+  #  point[3] [ 0.086 0.208 ]
+  #  point[4] [ 0.000 0.225 ]
+  #  point[5] [ -0.086 0.208 ]
+  #  point[6] [ -0.159 0.159 ]
+  #  point[7] [ -0.208 0.086 ]
+  #  point[8] [ -0.225 0.000 ]
+  #  point[9] [ -0.208 -0.086 ]
+   # point[10] [ -0.159 -0.159 ]
+   # point[11] [ -0.086 -0.208 ]
+   # point[12] [ -0.000 -0.225 ]
+   # point[13] [ 0.086 -0.208 ]
+  #  point[14] [ 0.159 -0.159 ]
+  #  point[15] [ 0.208 -0.086 ]
+  #  z [0 1]
+  #)
+    
   # Add a laser
-  LaserFront(pose [ 0.10 0.000 -0.500 0.000 ])    #pose in its parent's coordinate system
-  # Add a laser
-  LaserFront(pose [ 0.210 0.000 -1.25 0.000 ])    #pose in its parent's coordinate system
+  LaserFront(pose [ 0.100 0.000 -0.500 0.000 ])    #pose in its parent's coordinate system
   
+  #Add a camera
   
   #LOCALIZATION
   # Report error-free position in world coordinates
@@ -194,18 +183,24 @@ floorMap                     # load an environment bitmap
   # MAPIRlab_furniture.pgm 1000x1100px
   # resolution 0.01 m/px
   bitmap "./MAPIRlab_furniture.pgm"
-  size [10.0 11.0 3.00]           #m  
-  pose [ 0.0 0.0 0.000 0.000 ]    #Coordinates (m) of the Center of the image_map
+  size [10.000 11.000 3.000]           #m  
+  pose [ 0.000 0.000 0.000 0.000 ]    #Coordinates (m) of the Center of the image_map
 )
 
 # throw in a robot
-robotBase( pose [ -3.75 2.17 0.000 0.000 ] name "SimRobot" color "orange")
-# 2 3 <- initial
-#-3.75 2.17 <- between the "chairs"
-chair (pose [-3.78 1.47 0.0 90 ] name "ObstacleChair0" color "red")
-chair (pose [-3.78 2.81 0.0 90 ] name "ObstacleChair1" color "red")
-tableLeg (pose [-3 3.13 0.0 90 ] name "LeftTableLeg" color "red")
-tableLeg (pose [-1.4 3.13 0.0 90 ] name "RightTableLeg" color "red")
-table (pose [-2.2 3.13 0.8 90 ] name "Table" color "red")
-#chair (pose [-0.36 5.00 0.0 90 ] name "ObstacleChair0" color "red")
-#chair (pose [-0.33 3.57 0.0 90 ] name "ObstacleChair1" color "red")
+
+tableLeg (pose [-2.735 3.664 0.100 90.000 ] name "box1" color "red")
+tableLeg (pose [-2.333 1.997 0.100 90.000 ] name "box1" color "red")
+tableLeg (pose [-3.000 -0.337 0.100 90.000 ] name "box1" color "red")
+tableLeg (pose [-3.667 0.996 0.100 90.000 ] name "box1" color "red")
+tableLeg (pose [-1.401 3.329 0.100 90.000 ] name "box1" color "red")
+tableLeg (pose [-2.001 0.396 0.100 90.000 ] name "box1" color "red")
+tableLeg (pose [1.466 3.596 0.100 90.000 ] name "box1" color "red")
+tableLeg (pose [4.600 -1.404 0.100 90.000 ] name "box1" color "red")
+tableLeg (pose [-1.667 4.730 0.100 90.000 ] name "box1" color "red")
+tableLeg (pose [-0.200 4.063 0.100 90.000 ] name "box1" color "red")
+tableLeg (pose [-3.600 2.330 0.100 90.000 ] name "box1" color "red")
+tableLeg (pose [2.734 4.463 0.100 90.000 ] name "box1" color "red")
+tableLeg (pose [-1.133 1.730 0.100 90.000 ] name "box1" color "red")
+robotBase( pose [ -2.717 -4.569 0.000 62.629 ] name "SimRobot" color "blue")
+

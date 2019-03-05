@@ -10,18 +10,18 @@ raytrace_range: 3.0 #Clear out space (remove obstacles) up to 3.0 meters away gi
 #footprint: [[0.35,0.25],[0.35,-0.25],[-0.35,-0.25],[-0.35,0.25]]
 #A circular footprint of 0.45 diameter
 #footprint: [[ 0.225,0.000 ], [ 0.208, 0.086 ],[ 0.159, 0.159 ],[ 0.086, 0.208 ], [ 0.000, 0.225 ], [ -0.086, 0.208 ], [ -0.159, 0.159 ], [ -0.208, 0.086 ], [ -0.225, 0.000 ],[ -0.208, -0.086 ], [ -0.159, -0.159 ], [ -0.086, -0.208 ], [ -0.000, -0.225 ], [ 0.086, -0.208 ], [ 0.159, -0.159 ], [ 0.208, -0.086 ]]    
-robot_radius: 0.26           #[m] radius of the robot shape for Giraff Robots (instead of the footprint)
+robot_radius: 0.22           #[m] radius of the robot shape for Giraff Robots (instead of the footprint)
 #inflation_radius: 0.6
 
 
 # List of sensors that are going to be passing information to the costmap
-observation_sources: laser_scan laser2_scan laser_stage point_cloud_in
+observation_sources: laser_stage
 
 #sensor_id: {sensor_frame: [], data_type: [LaserScan/PointCloud], topic: [], marking: true, clearing: true}
 #laser_scan: {sensor_frame: /laser_link, data_type: LaserScan, topic: /laser_scan, marking: true, clearing: true}
 #laser2_scan: {sensor_frame: /laser2_link, data_type: LaserScan, topic: /laser2_scan, marking: true, clearing: true}
-#laser_stage: {sensor_frame: /laser_stage, data_type: LaserScan, topic: /laser_scan, marking: true, clearing: true}
-point_cloud_in: {sensor_frame: /base_link, data_type: PointCloud, topic: /local_map_pointcloud, marking: true, clearing: true}
+laser_stage: {sensor_frame: /laser_stage, data_type: LaserScan, topic: /laser_scan, marking: true, clearing: true}
+up_cloud: {sensor_frame: /camera_1, data_type: PointCloud2, topic: /points_1, marking: true, clearing: true}
 
 #Planners
 #---------

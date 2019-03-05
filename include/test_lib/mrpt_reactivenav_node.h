@@ -446,41 +446,6 @@ class ReactiveNavNode
 		{
 			std::lock_guard<std::mutex> csl(m_reactive_nav_engine_cs);
 			m_reactive_nav_engine->navigate(&navParams);
-			/*
-			std::lock_guard<std::mutex> csl(m_reactive_nav_engine_cs);
-			//if (TEST) 
-			if (target.phi != 0)
-			{
-			
-			ROS_INFO("[navigateTo]::TESTCONT= %d", TESTCONT);
-			TEST = false;
-			mrpt::nav::TWaypointSequence msg;
-			mrpt::nav::TWaypoint single_waypoint(target.x, target.y, m_target_allowed_distance,
-					 false, target.phi);
-			msg.waypoints.push_back(single_waypoint);
-			m_reactive_nav_engine->navigateWaypoints(msg);
-			msg.clear();
-			}	else {
-				m_reactive_nav_engine->navigate(&navParams);
-			}		
-			TESTCONT++;
-
-			mrpt::math::TPose2D curPose;
-			mrpt::math::TTwist2D curVel;
-			mrpt::system::TTimeStamp timestamp;
-			mrpt::math::TPose2D curOdometry; 
-			std::string frame_id;
-			m_reactive_if.getCurrentPoseAndSpeeds(
-			curPose, curVel,timestamp,curOdometry, frame_id);
-			const mrpt::math::TSegment2D seg_robot_mov = mrpt::math::TSegment2D(
-			mrpt::math::TPoint2D(curPose),
-			mrpt::math::TPoint2D(curPose));
-			const double targetDist = seg_robot_mov.distance(
-			mrpt::math::TPoint2D(navParams.target.target_coords));
-			ROS_INFO("\n\n\n\n\n\n\n\n\n\n\n targetDist = %f \n %s \n\n\n\n\n\n\n\n\n\n", targetDist,mrpt::math::TPoint2D(navParams.target.target_coords).asString().c_str());
-
-
-*/
 		}
 	}
 
@@ -571,6 +536,7 @@ class ReactiveNavNode
                     }
                 }
 	}
+	// Not a callback. Used on constructor
 	void onRosSetRobotShape3D(const mrpt::nav::TRobotShape& newShape)
 	{
 		ROS_INFO_STREAM("[onRosSetRobotShape3D] Robot shape received via params");

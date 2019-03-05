@@ -1,6 +1,8 @@
 <!-- Launch file principal para lanzar una simulación con Stage + MoveBse -->
 
 <launch>    
+
+	<arg name="case_map" default= "" />
     <node pkg="mrpt_local_obstacles" type="mrpt_local_obstacles_node" name="mrpt_local_obstacles_node" output="screen">
 		<param name="source_topics_2dscan" value="laser_scan"/>
 		<param name="show_gui" value="false"/>
@@ -10,7 +12,7 @@
     <param name="use_sim_time" value="true" />
 
     <include file="$(find tfg_reactive_pkg)/launch/simbot_stage.launch" >
-        <arg name="world_file" value="-d $(find mrpt_reactivenav)/maps/MAPIRlab_furniture.world" />
+        <arg name="world_file" value="-d $(find mrpt_reactivenav)/maps/MAPIRlab_furniture$(arg case_map).world" />
         <arg name="disable_odometry" value="false" />
     </include>      
     

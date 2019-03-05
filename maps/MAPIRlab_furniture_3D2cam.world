@@ -32,7 +32,7 @@ define LaserFront ranger          # Infra-red (IR) range sensor
 (
   sensor(
     range [ 0.0  30.0 ]           #min max in [m]
-    fov 360 #270.25                    #deg
+    fov 270.25                    #deg
     samples 1081                  #Num samples
   )
 
@@ -51,16 +51,27 @@ define LaserFront ranger          # Infra-red (IR) range sensor
 	
   # generic model properties
   color_rgba [ 0 0 1 0.3 ]
-  size [ 0.05 0.005 0.1 ]
+  size [ 0.050 0.005 0.100 ]
 )
 
 
 define CameraFront camera          # RGB camera
 (
   resolution [80 60]  #[640 480]   #width,height (px)
-  range [0.2 2.8]        #(m) min, max
-  fov [ 100.0 100.0 ]    #horizonal, vertical
-  pantilt [ 0.0 0.0 ]   #degrees
+  range [0.2 3.5]        #(m) min, max
+  fov [ 58.0 45.0 ]    #horizonal, vertical
+  pantilt [0.0 0.0 ]   #degrees
+  # generic model properties
+  color "red"
+  size [ 0.050 0.050 0.100 ]
+)
+
+define CameraFrontTilted camera          # RGB camera
+(
+  resolution [80 60]  #[640 480]   #width,height (px)
+  range [0.2 3.5]        #(m) min, max
+  fov [ 58.0 45.0 ]    #horizonal, vertical
+  pantilt [ 0.0 60.0 ]   #degrees
   
   # generic model properties
   color "red"
@@ -91,7 +102,7 @@ define chair model
 
 define tableLeg model
 (
-	size [0.5 0.5 0.8]
+	size [0.500 0.500 0.800]
 	block ( points 4
 		point[0] [0.100 0.100]
 		point[1] [0.100 -0.100]
@@ -105,7 +116,7 @@ define tableLeg model
 
 define table model
 (
-	size [0.5 2.5 0.8]
+	size [0.500 2.500 0.800]
 	block ( points 4
 		point[0] [0.100 0.100]
 		point[1] [0.100 -0.100]
@@ -121,8 +132,8 @@ define table model
 
 define robotBase position      # Mobile robot base.
 (
-  size [0.45 0.45 1.50]
-  origin [0.00 0.000 0.000 0.000]
+  size [0.450 0.450 1.500]
+  origin [0.000 0.000 0.000 0.000]
   gui_nose 1
   drive "diff"
   
@@ -159,11 +170,13 @@ define robotBase position      # Mobile robot base.
 
 
   # Add a laser
-  LaserFront(pose [ 0.10 0.000 -0.500 0.000 ])    #pose in its parent's coordinate system
+  #LaserFront(pose [ 0.10 0.000 -0.500 0.000 ])    #pose in its parent's coordinate system
   # Add a laser
-  LaserFront(pose [ 0.210 0.000 -1.25 0.000 ])    #pose in its parent's coordinate system
+  LaserFront(pose [ 0.210 0.000 -1.250 0.000 ])    #pose in its parent's coordinate system
   
-  
+  #Add a camera
+  CameraFrontTilted(pose [-0.200 0.000 0.600 0.000 0 0])    #pose in its parent's coordinate system
+  CameraFront(pose [-0.200 0.000 -0.600 0.000])
   #LOCALIZATION
   # Report error-free position in world coordinates
   localization "gps"
@@ -194,18 +207,18 @@ floorMap                     # load an environment bitmap
   # MAPIRlab_furniture.pgm 1000x1100px
   # resolution 0.01 m/px
   bitmap "./MAPIRlab_furniture.pgm"
-  size [10.0 11.0 3.00]           #m  
-  pose [ 0.0 0.0 0.000 0.000 ]    #Coordinates (m) of the Center of the image_map
+  size [10.000 11.000 3.000]           #m  
+  pose [ 0.000 0.000 0.000 0.000 ]    #Coordinates (m) of the Center of the image_map
 )
 
 # throw in a robot
-robotBase( pose [ -3.75 2.17 0.000 0.000 ] name "SimRobot" color "orange")
+robotBase( pose [ -4.043 2.465 0.000 88.119 ] name "SimRobot" color "orange")
 # 2 3 <- initial
 #-3.75 2.17 <- between the "chairs"
-chair (pose [-3.78 1.47 0.0 90 ] name "ObstacleChair0" color "red")
-chair (pose [-3.78 2.81 0.0 90 ] name "ObstacleChair1" color "red")
-tableLeg (pose [-3 3.13 0.0 90 ] name "LeftTableLeg" color "red")
-tableLeg (pose [-1.4 3.13 0.0 90 ] name "RightTableLeg" color "red")
-table (pose [-2.2 3.13 0.8 90 ] name "Table" color "red")
+#chair (pose [-3.78 1.47 0.0 90 ] name "ObstacleChair0" color "red")
+#chair (pose [-3.78 2.81 0.0 90 ] name "ObstacleChair1" color "red")
+tableLeg (pose [-3.118 3.009 0.000 90.000 ] name "LeftTableLeg" color "red")
+tableLeg (pose [-1.931 3.062 0.000 90.000 ] name "RightTableLeg" color "red")
+table (pose [-2.583 3.083 0.800 90.000 ] name "Table" color "red")
 #chair (pose [-0.36 5.00 0.0 90 ] name "ObstacleChair0" color "red")
 #chair (pose [-0.33 3.57 0.0 90 ] name "ObstacleChair1" color "red")

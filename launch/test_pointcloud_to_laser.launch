@@ -1,0 +1,100 @@
+<!-- Launch file principal para lanzar una simulación con Stage + MoveBse -->
+
+<launch>    
+
+	<arg name="map_file" default="" />
+    ### ROBOT SIMULATION ###
+    <param name="use_sim_time" value="true" />
+    <include file="$(find mrpt_reactivenav)/launch/simbot_stage.launch" >
+        <arg name="world_file" value="-d $(find mrpt_reactivenav)/maps/MAPIRlab_furniture_3D2cam.world" />
+        <arg name="disable_odometry" value="false" />
+    </include>      
+    
+  <node pkg="nodelet" type="nodelet" args="manager" name="record_player_manager" output="screen"/>
+  
+
+  <include file="$(find tfg_reactive_pkg)/launch/proc_depth_image.launch"> 
+			<arg name="topic_cloud" value="/depth_0" />
+			<arg name="topic_camera_info" value="/camera_info_0" />
+			<arg name="topic_out_pc" value="/points_0" />
+			
+			<arg name="name_nodelet" value="0" />
+   </include>
+
+   <include file="$(find tfg_reactive_pkg)/launch/proc_depth_image.launch"> 
+			<arg name="topic_cloud" value="/depth_1" />
+			<arg name="topic_camera_info" value="/camera_info_1" />
+			<arg name="topic_out_pc" value="/points_1" />
+			
+			<arg name="name_nodelet" value="1" />
+    </include>
+    ### URDF model "r2d2" ###
+    <include file="$(find tfg_reactive_pkg)/launch/simbot_urdf.launch" />
+    
+    ### NAVIGATION ###
+    <include file="$(find tfg_reactive_pkg)/launch/simbot_map_server.launch">
+        <arg name="map_file" value="$(find mrpt_reactivenav)/maps/MAPIRlab_furniture_3D.yaml" />
+    </include>
+    <include file="$(find tfg_reactive_pkg)/launch/simbot_fake_loc.launch" />
+  
+	<node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan_r">
+        <remap from="cloud_in" to="points_0"/>     # Input topic (the rgbd pointCloud)
+        <remap from="scan" to="camera_0/scan"/>                            # Output topic (the laserscan)
+        <param name="target_frame" value="base_link" />                # Leave "" to output scan in pointcloud frame
+        <rosparam>
+            transform_tolerance: 0.01
+            min_height: 0
+            max_height: 0.33
+
+            angle_min: -1.5708              # -M_PI/2
+            angle_max: 1.5708               # M_PI/2
+            angle_increment: 0.0087         # M_PI/360.0
+            scan_time: 0.3333
+            range_min: 0.45
+            range_max: 4.0
+            use_inf: true
+
+            # Concurrency level, affects number of pointclouds queued for processing and number of threads used
+            # 0 : Detect number of cores
+            # 1 : Single threaded
+            # 2->inf : Parallelism level
+            concurrency_level: 1
+        </rosparam>
+    </node>
+    <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan_l">
+        <remap from="cloud_in" to="points_1"/>     # Input topic (the rgbd pointCloud)
+        <remap from="scan" to="camera_1/scan"/>                            # Output topic (the laserscan)
+        <param name="target_frame" value="neck" />                # Leave "" to output scan in pointcloud frame
+        <rosparam>
+            transform_tolerance: 0.01
+            min_height: 0.33
+            max_height: 1
+
+            angle_min: -1.5708              # -M_PI/2
+            angle_max: 1.5708               # M_PI/2
+            angle_increment: 0.0087         # M_PI/360.0
+            scan_time: 0.3333
+            range_min: 0.45
+            range_max: 4.0
+            use_inf: true
+
+            # Concurrency level, affects number of pointclouds queued for processing and number of threads used
+            # 0 : Detect number of cores
+            # 1 : Single threaded
+            # 2->inf : Parallelism level
+            concurrency_level: 1
+        </rosparam>
+    </node>
+
+	<node pkg="mrpt_local_obstacles" type="mrpt_local_obstacles_node" name="mrpt_local_obstacles_node" output="screen">
+		<param name="source_topics_2dscan" value="/camera_0/scan, /camera_1/scan, laser_scan"/>
+		<param name="show_gui" value="false"/>
+		<param name="window_time" value="0.1" />
+    </node>
+
+
+    ### RVIZ ###
+    <node name="rviz_player" pkg="rviz" type="rviz" args="-d $(find mrpt_reactivenav)/cfg/rvizco.rviz"/>
+	
+
+</launch>
