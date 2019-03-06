@@ -78,6 +78,35 @@ define CameraFrontTilted camera          # RGB camera
   size [ 0.050 0.050 0.100 ]
 )
 
+define tableLegSlim model
+(
+	size [0.100 0.100 0.800]
+	block ( points 4
+		point[0] [0.100 0.100]
+		point[1] [0.100 -0.100]
+		point[2] [-0.100 -0.100]
+		point[3] [-0.100 0.100]
+		z [0 1]
+	
+	)
+
+)
+
+define tableReal model
+(
+	size [3.000 2.000 0.200]
+	block ( points 4
+		point[0] [0.100 0.100]
+		point[1] [0.100 -0.100]
+		point[2] [-0.100 -0.100]
+		point[3] [-0.100 0.100]
+		z [0 0.2]
+	
+	)
+
+)
+
+
 define chair model
 (
 	size [1 1 4]
@@ -220,5 +249,14 @@ robotBase( pose [ -4.043 2.465 0.000 88.119 ] name "SimRobot" color "orange")
 tableLeg (pose [-3.118 3.009 0.000 90.000 ] name "LeftTableLeg" color "red")
 tableLeg (pose [-1.931 3.062 0.000 90.000 ] name "RightTableLeg" color "red")
 table (pose [-2.583 3.083 0.800 90.000 ] name "Table" color "red")
+
+
+tableLegSlim (pose [-10.186 4.812 0.000 90.000 ] name "LeftTableLeg" color "red")
+tableLegSlim (pose [-8.416 4.812 0.000 90.000 ] name "RightTableLeg" color "red")
+tableLegSlim (pose [-10.186 2.812 0.000 90.000 ] name "LeftTableLeg" color "red")
+tableLegSlim (pose [-8.416 2.812 0.000 90.000 ] name "RightTableLeg" color "red")
+tableReal (pose [-9.267 3.730 0.800 90.000 ] name "Table" color "red")
+
+
 #chair (pose [-0.36 5.00 0.0 90 ] name "ObstacleChair0" color "red")
 #chair (pose [-0.33 3.57 0.0 90 ] name "ObstacleChair1" color "red")

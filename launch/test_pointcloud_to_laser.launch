@@ -37,14 +37,15 @@
     </include>
     <include file="$(find tfg_reactive_pkg)/launch/simbot_fake_loc.launch" />
   
-	<node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan_r">
-        <remap from="cloud_in" to="points_0"/>     # Input topic (the rgbd pointCloud)
+	<node pkg="nodelet" type="nodelet" name="pointcloud_to_laserscan" args="load pointcloud_to_laserscan/pointcloud_to_laserscan_nodelet record_player_manager">
+    
+    <remap from="cloud_in" to="points_1"/>     # Input topic (the rgbd pointCloud)
         <remap from="scan" to="camera_0/scan"/>                            # Output topic (the laserscan)
-        <param name="target_frame" value="base_link" />                # Leave "" to output scan in pointcloud frame
+        <param name="target_frame" value="neck" />                # Leave "" to output scan in pointcloud frame
         <rosparam>
             transform_tolerance: 0.01
-            min_height: 0
-            max_height: 0.33
+            min_height: 0.33
+            max_height: 3
 
             angle_min: -1.5708              # -M_PI/2
             angle_max: 1.5708               # M_PI/2
@@ -61,14 +62,16 @@
             concurrency_level: 1
         </rosparam>
     </node>
-    <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan_l">
-        <remap from="cloud_in" to="points_1"/>     # Input topic (the rgbd pointCloud)
+    
+<node pkg="nodelet" type="nodelet" name="pointcloud_to_laserscan_l" args="load pointcloud_to_laserscan/pointcloud_to_laserscan_nodelet record_player_manager">
+    
+    <remap from="cloud_in" to="points_0"/>     # Input topic (the rgbd pointCloud)
         <remap from="scan" to="camera_1/scan"/>                            # Output topic (the laserscan)
         <param name="target_frame" value="neck" />                # Leave "" to output scan in pointcloud frame
         <rosparam>
             transform_tolerance: 0.01
             min_height: 0.33
-            max_height: 1
+            max_height: 3
 
             angle_min: -1.5708              # -M_PI/2
             angle_max: 1.5708               # M_PI/2
@@ -89,10 +92,16 @@
 	<node pkg="mrpt_local_obstacles" type="mrpt_local_obstacles_node" name="mrpt_local_obstacles_node" output="screen">
 		<param name="source_topics_2dscan" value="/camera_0/scan, /camera_1/scan, laser_scan"/>
 		<param name="show_gui" value="false"/>
-		<param name="window_time" value="0.1" />
+		<param name="time_window" value="0.4" />
     </node>
 
-
+	
+    <node pkg="keyboard_control" type="keyboard_control" name="keyboard_control" />
+	<include file="$(find mrpt_reactivenav)/launch/simbot_move_base.launch">
+		<arg name="nav_type" value="3D"/>
+		<arg name="config_reactive_file" value="$(find mrpt_reactivenav)/tutorial/reactive3d_custom_config.ini"/>
+		<arg name="shape3D_file" value="$(find shape_publisher)/shape_file/giraff3D.yaml" />
+	</include>
     ### RVIZ ###
     <node name="rviz_player" pkg="rviz" type="rviz" args="-d $(find mrpt_reactivenav)/cfg/rvizco.rviz"/>
 	

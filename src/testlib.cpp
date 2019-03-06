@@ -108,6 +108,11 @@ namespace testlib
 		m_localnh.param(
 			"target_allowed_distance", m_target_allowed_distance,
 			m_target_allowed_distance);
+		
+		m_localnh.param(
+			"index_waypoint", WAYPOINT_INDEX,
+			50);
+		ROS_INFO("[MyNavigator::initialize] WAYPOINT_INDEX: %d", WAYPOINT_INDEX);
 		// Check and get topic name where reactive engine will publish vel commands.
 		std::string topic_cmd_vel = "cmd_vel";
 		m_localnh.param("topic_cmd_vel", topic_cmd_vel,topic_cmd_vel);
