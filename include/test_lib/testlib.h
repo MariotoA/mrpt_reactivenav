@@ -1,6 +1,7 @@
 #ifndef TESTLIB__TESTLIB_H_
 #define TESTLIB__TESTLIB_H_
 
+#include <std_msgs/Bool.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <geometry_msgs/Twist.h>
@@ -32,6 +33,7 @@ namespace testlib // this namespace will be changed.
 			ros::NodeHandle m_localnh{"~"}; // this way it initializes non const static attributes.
 			ros::Publisher m_goal_pub;
 			ros::Subscriber m_pub_cmd_vel;
+			ros::Subscriber m_pub_end_nav_event;
 			// The global plan sended by move_base.
 			std::vector<geometry_msgs::PoseStamped> m_g_plan;
 			// Robot pose. To check if waypoint is reached. TODO. Issue #9
@@ -53,13 +55,15 @@ namespace testlib // this namespace will be changed.
 			bool m_robot_pose_initialized;
 			bool m_is_last_waypoint;
 			bool m_is_received_path;
-			
+			bool m_is_reactive_mrpt_finished;
 			////////////////////// Methods:
 
 			void velocityCommandCallback(const geometry_msgs::Twist& cmd_vel);
+			void endNavigationCallback(const std_msgs::Bool& msg);
 			bool isWaypointReached();
 			bool isNextWaypointNeeded();
 			bool isInGoalPosition();
+			bool endAllignment();
 		public:
 			/**
 			* @brief  Default constructor for the ros wrapper

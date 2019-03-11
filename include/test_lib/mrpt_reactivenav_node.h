@@ -34,6 +34,7 @@
 
 #include <ros/ros.h>
 
+#include <std_msgs/Bool.h>
 #include <sensor_msgs/LaserScan.h>
 #include <sensor_msgs/PointCloud.h>
 #include <geometry_msgs/PoseStamped.h>
@@ -99,6 +100,7 @@ class ReactiveNavNode
 	ros::Subscriber m_sub_local_obs;
 	ros::Subscriber m_sub_robot_shape;
 	ros::Publisher m_pub_cmd_vel;
+	ros::Publisher m_pub_end_nav;
 	tf::TransformListener m_tf_listener;  //!< Use to retrieve TF data
 	/** @} */
 
@@ -109,7 +111,8 @@ class ReactiveNavNode
 	std::string m_pub_topic_reactive_nav_goal;
 	std::string m_sub_topic_local_obstacles;
 	std::string m_sub_topic_robot_shape;
-	std::string m_pub_topic_cmd_vel;	
+	std::string m_pub_topic_cmd_vel;
+	std::string m_pub_topic_end_nav_event;	
 
 	std::string m_frameid_reference;
 	std::string m_frameid_robot;
@@ -286,7 +289,10 @@ class ReactiveNavNode
 		
 		void sendNavigationEndEvent() 
 		{
-			ROS_INFO("[sendNavigationEndEvent] Finishing navigation...");
+			std_msgs::Bool msg;
+			ROS_INFO("[MyReactiveInterface::sendNavigationEndEvent] Finishing navigation...");
+			m_parent.m_pub_end_nav.publish(msg);
+			
 		}
 		/*virtual void sendNavigationStartEvent() {}//TODO i guess
 		virtual void sendNavigationEndEvent() {}
@@ -309,6 +315,7 @@ class ReactiveNavNode
 		  m_target_allowed_distance(0.40f),
 		  m_nav_period(0.100),
 		  m_pub_topic_reactive_nav_goal("reactive_nav_goal"),
+		  m_pub_topic_end_nav_event("end_nav_event"),
 		  m_sub_topic_local_obstacles("local_map_pointcloud"),
 		  m_sub_topic_robot_shape(""),
 		  m_pub_topic_cmd_vel("cmd_vel"),
@@ -345,6 +352,9 @@ class ReactiveNavNode
 		m_localn.param(
 			"topic_relative_nav_goal", m_pub_topic_reactive_nav_goal,
 			m_pub_topic_reactive_nav_goal);
+		m_localn.param(
+			"topic_end_navigation", m_pub_topic_end_nav_event,
+			m_pub_topic_end_nav_event);
 		m_localn.param("save_nav_log", m_save_nav_log, m_save_nav_log);
 		m_localn.param("topic_cmd_vel", m_pub_topic_cmd_vel,m_pub_topic_cmd_vel);
 		ROS_ASSERT(m_nav_period > 0);
@@ -402,6 +412,7 @@ class ReactiveNavNode
 		// Init ROS publishers:
 		// -----------------------
 		m_pub_cmd_vel = m_nh.advertise<geometry_msgs::Twist>(m_pub_topic_cmd_vel, 1);
+		m_pub_end_nav = m_nh.advertise<std_msgs::Bool>(m_pub_topic_end_nav_event, 1);
 
 		// Init ROS subs:
 		// -----------------------

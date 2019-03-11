@@ -27,7 +27,10 @@ namespace testlib
 		//TODO
 		// We're gonna send the goal to mrpt's reactive navigation engine and then receive the command from them.
 
-		if (!m_g_plan.empty() && isNextWaypointNeeded()) 
+		if (m_is_reactive_mrpt_finished) 
+		{
+			endAllignment();
+		}else if (!m_g_plan.empty() && isNextWaypointNeeded()) 
 		{
 			int ind;
 			m_localnh.param("index_waypoint", ind,WAYPOINT_INDEX);
@@ -62,9 +65,15 @@ namespace testlib
 					// that way plugin and reactive can stop at the same time.
 					m_cmd_vel.linear.x < MIN_VEL_VALUE &&
 					m_cmd_vel.linear.y < MIN_VEL_VALUE;
+		tf::Quaternion q = m_current_pose.getRotation(); 
+		double yaw_curr = tf::getYaw(q), yaw_goal = tf::getYaw(m_waypoint.pose.orientation);
+		double dist = yaw_curr - yaw_goal;
+		end = end && sqrt(dist*dist) <= 0.04;
 		if (end)
 		{
 			m_is_last_waypoint = false; // this enables next navigation.
+			m_is_reactive_mrpt_finished = false;
+			ROS_INFO("[MyNavigator::isGoalReached] \n\nGoal is reached. Navigation has ended.\n");
 		}
 		return end;
 		
@@ -102,6 +111,7 @@ namespace testlib
 		m_tf = tf;
 		// Check and get reactive goal param
 		std::string topic_reactive_goal = "/reactive_nav_goal";
+		std::string topic_end_nav = "end_nav_event";
 		m_localnh.param("topic_relative_nav_goal", topic_reactive_goal,topic_reactive_goal);
 		// Get publisher on reactive goal topic
 		m_goal_pub = m_nh.advertise<geometry_msgs::PoseStamped>(topic_reactive_goal,1);
@@ -121,9 +131,13 @@ namespace testlib
 		// Subscribe to said topic and vincule callback
 		m_pub_cmd_vel = m_nh.subscribe<const geometry_msgs::Twist&>(topic_cmd_vel, 1,
 			&MyNavigator::velocityCommandCallback, this);
+		
+		m_pub_end_nav_event = m_nh.subscribe<const std_msgs::Bool&>(topic_end_nav, 1,
+			&MyNavigator::endNavigationCallback, this);
 		// flags initialization
 		m_is_last_waypoint = false;
 		m_is_received_path = false;
+		m_is_reactive_mrpt_finished = false;
 		
 	};
 	
@@ -143,9 +157,9 @@ namespace testlib
 		double x=m_current_pose.getOrigin().x() - m_waypoint.pose.position.x;
 		double y=m_current_pose.getOrigin().y() - m_waypoint.pose.position.y;
 		bool res = sqrt(x*x + y*y) <= m_target_allowed_distance;
-		ROS_INFO(res? "\n\n\n[MyNavigator::isWaypointReached] Waypoint reached.\n\n"
-					: "[MyNavigator::isWaypointReached] Waypoint not reached yet."
-		);
+		if (!m_is_reactive_mrpt_finished)
+			ROS_INFO(res? "\n\n\n[MyNavigator::isWaypointReached] Waypoint reached.\n\n"
+					: "[MyNavigator::isWaypointReached] Waypoint not reached yet.");
 		return res;
 	}
 	
@@ -156,6 +170,26 @@ namespace testlib
 	
 	void MyNavigator::velocityCommandCallback(const geometry_msgs::Twist& cmd_vel)
 	{
+		m_cmd_vel = cmd_vel;
+	}
+	void MyNavigator::endNavigationCallback(const std_msgs::Bool&)
+	{
+		m_is_reactive_mrpt_finished = true;
+	}
+	bool MyNavigator::endAllignment()
+	{
+		ROS_INFO("[MyNavigator::endAllignment] MRPT has finished, plugin is aligning to pose goal. Please wait.");
+		geometry_msgs::Twist cmd_vel;
+		tf::Quaternion q = m_current_pose.getRotation(); 
+		double yaw_curr = tf::getYaw(q), yaw_goal = tf::getYaw(m_waypoint.pose.orientation);
+		double dist= yaw_curr - yaw_goal;
+		if (dist > 0.04) 
+		{
+			cmd_vel.angular.z = -0.2;
+		} else if (dist < -0.04) 
+		{
+			cmd_vel.angular.z = 0.2;
+		}
 		m_cmd_vel = cmd_vel;
 	}
 };
