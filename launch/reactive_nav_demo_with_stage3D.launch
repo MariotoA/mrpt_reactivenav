@@ -16,22 +16,22 @@
     </include>
     <include file="$(find tfg_reactive_pkg)/launch/simbot_fake_loc.launch" />
         	<!-- Node: Local obstacles builder -->
-	<node pkg="mrpt_local_obstacles" type="mrpt_local_obstacles_node" name="mrpt_local_obstacles_node" output="screen">
-		<param name="source_topics_2dscan" value="laser_scan_0, laser_scan_1"/>
-		<param name="show_gui" value="false"/>
-		<!--<rosparam param="robot_heights"> [0.24, 0.69, 1.2, 1.71]</rosparam>-->
-		<!-- <param name="time_window" value="5"/>-->
-	</node>
 	
     <include file="$(find tfg_reactive_pkg)/launch/simbot_urdf.launch" />
     <!--<node pkg="shape_publisher" type="shape_publisher" name="shape_publisher" output="screen" launch-prefix="xterm -e">
 	<rosparam file="$(find shape_publisher)/shape_file/giraff.yaml" command="load" />
     </node>-->
+	
+    <node pkg="keyboard_control" type="keyboard_control" name="keyboard_control" />
 
-
+    <node pkg="mrpt_local_obstacles" type="mrpt_local_obstacles_node" name="mrpt_local_obstacles_node" output="screen">
+		<param name="source_topics_2dscan" value="laser_scan_0,laser_scan_1"/>
+		<param name="show_gui" value="false"/>
+    </node>
 	### Node: Pure Reactive Navigator ###
-	<node pkg="mrpt_reactivenav" type="mrpt_reactivenav_node" name="mrpt_reactivenav_node" output="screen">
-		<!-- Set type of reactive navigator (2D or 3D) -->
+	<node pkg="mrpt_reactivenav" type="mrpt_reactivenav_node" name="mrpt_reactivenav_node" output="screen" 
+	launch-prefix="xterm -e gdb --args">
+		<!-- Set type of reactive navigator (2D or 3D)  launch-prefix="xterm -e gdb args" -->
 		<param name="nav_type" value="3D"/> 
 
 		<!-- *Important*: This external config file holds the most important navigation settings -->

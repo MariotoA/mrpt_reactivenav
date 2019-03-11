@@ -387,11 +387,11 @@ class ReactiveNavNode
 			ROS_INFO("Wait done.");
 		} else if (!m_sub_topic_robot_shape.empty())
 		{
-			mrpt::nav::TRobotShape rob;
+			/*mrpt::nav::TRobotShape rob;
 			if (shape::getTRobotShape(rob,m_localn))
 				onRosSetRobotShape3D(rob);
 			else
-				ROS_INFO("Could not read 3D shape");
+				ROS_INFO("Could not read 3D shape");*/
 		}
 
 		// Init ROS publishers:
@@ -439,6 +439,7 @@ class ReactiveNavNode
 		target_info.targetIsRelative = target_info_mult.targetIsRelative = false;
 
 		navParams.multiple_targets.push_back(target_info_mult);
+		navParams.target = target_info;
 		//navParams.target = target_info;
 		// Optional: restrict the PTGs to use
 		// navParams.restrict_PTG_indices.push_back(1);
@@ -546,6 +547,19 @@ class ReactiveNavNode
 			{
 				std::lock_guard<std::mutex> csl(m_reactive_nav_engine_cs);
                 rns3D->changeRobotShape(newShape);
+				for (size_t l = 0; l < newShape.size(); l++)
+				{
+					std::vector< double > x,y;
+					newShape.polygon(l).getAllVertices(x, y);
+					double hei = newShape.getHeight(l);
+					double rad = newShape.getRadius(l);
+					for (int i = 0; i < x.size(); i++) 
+					{
+						ROS_INFO("[onRosSetRobotShape3D] level: %d, x:%f, y:%f",(int) l, x[i], y[i]);
+					}
+					ROS_INFO("[onRosSetRobotShape3D] level: %d, h:%f", (int) l, hei);
+					ROS_INFO("[onRosSetRobotShape3D] level: %d, r:%f", (int) l, rad);
+				}
             }
 		}
 			

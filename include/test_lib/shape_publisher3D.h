@@ -34,16 +34,21 @@ bool getTRobotShape(mrpt::nav::TRobotShape& robotShape, const ros::NodeHandle& n
 		std::string height_str = string_format("height_%d", initial);
 		
 		ROS_INFO("[shape::getTRobotShape] height string: %s",height_str.c_str());
+		std::string radius_str = string_format("radius_%d", initial);
+		
+		ROS_INFO("[shape::getTRobotShape] radius string: %s",radius_str.c_str());
+
 		std::string points_x_str = string_format("shape_x%d", initial);
 		
 		ROS_INFO("[shape::getTRobotShape] points_x string: %s",points_x_str.c_str());
 		std::string points_y_str = string_format("shape_y%d", initial);
 
 		ROS_INFO("[shape::getTRobotShape] points_y string: %s",points_y_str.c_str());
-		double height;
+		double height,radius;
 		std::vector<double> points_x,points_y;
 		
 		if (!nh.getParam(height_str, height) ||
+		!nh.getParam(radius_str, radius) ||
 		!nh.getParam(points_x_str, points_x) ||
 		!nh.getParam(points_y_str, points_y) )
 		{
@@ -55,6 +60,9 @@ bool getTRobotShape(mrpt::nav::TRobotShape& robotShape, const ros::NodeHandle& n
 		
 			ROS_INFO("[shape::getTRobotShape] Setting height ");
 		robotShape.setHeight(i, height);
+			
+			ROS_INFO("[shape::getTRobotShape] Setting radius ");
+		robotShape.setRadius(i, radius);
 		initial++;
 	}
 	return true;

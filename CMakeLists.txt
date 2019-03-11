@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.1)
 ADD_COMPILE_OPTIONS("-std=c++17")
-project(mrpt_reactivenav)
+project(mrpt_reactivenav CXX)
+
+set(CMAKE_BUILD_TYPE "Debug")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g")
+
+message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
+message(STATUS "Flags: " ${CMAKE_CXX_FLAGS})
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)

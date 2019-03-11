@@ -24,13 +24,13 @@
 	
     <include file="$(find tfg_reactive_pkg)/launch/simbot_urdf.launch" />
 
-    <node pkg="shape_publisher" type="shape_publisher" name="shape_publisher" output="screen" launch-prefix="xterm -e">
+    <node pkg="shape_publisher" type="shape_publisher" name="shape_publisher" output="screen" launch-prefix="xterm -e gdb --args">
 		<rosparam file="$(find shape_publisher)/shape_file/giraff.yaml" command="load" />
     </node>
 
 
 	### Node: Pure Reactive Navigator ###
-	<node pkg="mrpt_reactivenav" type="mrpt_reactivenav_node" name="mrpt_reactivenav_node" output="screen">
+	<node pkg="mrpt_reactivenav" type="mrpt_reactivenav_node" name="mrpt_reactivenav_node" output="screen" launch-prefix="xterm -e gdb --args">
 		<!-- Set type of reactive navigator (2D or 3D) -->
 		<param name="nav_type" value="2D"/> 
 

@@ -29,8 +29,10 @@ namespace testlib
 
 		if (!m_g_plan.empty() && isNextWaypointNeeded()) 
 		{
-			m_is_last_waypoint = m_g_plan.size() <= WAYPOINT_INDEX;
-			int ind = m_is_last_waypoint ? m_g_plan.size() - 1 : WAYPOINT_INDEX;
+			int ind;
+			m_localnh.param("index_waypoint", ind,WAYPOINT_INDEX);
+			m_is_last_waypoint = m_g_plan.size() <= ind;
+			ind = m_is_last_waypoint ? m_g_plan.size() - 1 : ind;
 			m_waypoint=m_g_plan[ind];
 			ROS_INFO("\n\n[MyNavigator::computeVelocityCommands] sending goal to reactive navigator: Pose[x:%f,y:%f,z:%f]",
 			 m_waypoint.pose.position.x,m_waypoint.pose.position.y,m_waypoint.pose.orientation.z);
