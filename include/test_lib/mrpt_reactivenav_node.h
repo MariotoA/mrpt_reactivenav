@@ -283,6 +283,11 @@ class ReactiveNavNode
 			}
 			return ret;
 		}
+		
+		void sendNavigationEndEvent() 
+		{
+			ROS_INFO("[sendNavigationEndEvent] Finishing navigation...");
+		}
 		/*virtual void sendNavigationStartEvent() {}//TODO i guess
 		virtual void sendNavigationEndEvent() {}
 		virtual void sendNavigationEndDueToErrorEvent() {}
