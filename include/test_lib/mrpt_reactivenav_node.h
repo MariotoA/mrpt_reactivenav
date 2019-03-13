@@ -120,7 +120,6 @@ class ReactiveNavNode
 	std::string nav_type="";
 
 	bool m_save_nav_log;
-	bool TEST = true; int TESTCONT = 0; //TODO
 	ros::Timer m_timer_run_nav;
 	CSimplePointsMap m_last_obstacles;
 	std::mutex m_last_obstacles_cs;
@@ -130,7 +129,6 @@ class ReactiveNavNode
 		public mrpt::nav::CRobot2NavInterface
 	{
 		ReactiveNavNode& m_parent;
-		bool m_ending_nav = false;
 		MyReactiveInterface(ReactiveNavNode& parent) : m_parent(parent) {}
 		/** Get the current pose and speeds of the robot.
 		 *   \param curPose Current robot pose.
@@ -179,7 +177,7 @@ class ReactiveNavNode
 			curV = curW = 0;
 			MRPT_TODO("Retrieve current speeds from odometry");
 			ROS_INFO(
-				"[getCurrentPoseAndSpeeds] Latest pose: %s",
+				"[MyReactiveInterface::getCurrentPoseAndSpeeds] Latest pose: %s",
 				curPose.asString().c_str());
 
 			curVel.vx = curV * cos(curPose.phi);
@@ -213,7 +211,6 @@ class ReactiveNavNode
 			//if (v >= 0.001 || w >= 0.001)
 			{
 				m_parent.m_pub_cmd_vel.publish(cmd);
-				m_ending_nav = false;
 			}
 			return true;
 		}
@@ -227,11 +224,7 @@ class ReactiveNavNode
 			geometry_msgs::Twist cmd;
 			cmd.linear.x = 0;
 			cmd.angular.z = 0;
-			if (!m_ending_nav) 
-			{
-				m_parent.m_pub_cmd_vel.publish(cmd);
-				m_ending_nav = true;
-			}
+			//m_parent.m_pub_cmd_vel.publish(cmd);
 			
 			return true ; //changeSpeeds(vel_cmd);
 		}
@@ -290,11 +283,18 @@ class ReactiveNavNode
 		void sendNavigationEndEvent() 
 		{
 			std_msgs::Bool msg;
+			msg.data = true;
 			ROS_INFO("[MyReactiveInterface::sendNavigationEndEvent] Finishing navigation...");
 			m_parent.m_pub_end_nav.publish(msg);
 			
 		}
-		/*virtual void sendNavigationStartEvent() {}//TODO i guess
+		void sendNavigationStartEvent() {
+			std_msgs::Bool msg;
+			msg.data = false;
+			ROS_INFO("[MyReactiveInterface::sendNavigationStartEvent] Starting navigation...");
+			m_parent.m_pub_end_nav.publish(msg);
+		}//TODO i guess
+		/*
 		virtual void sendNavigationEndEvent() {}
 		virtual void sendNavigationEndDueToErrorEvent() {}
 		virtual void sendWaySeemsBlockedEvent() {}*/
@@ -440,7 +440,7 @@ class ReactiveNavNode
 	void navigateTo(const mrpt::math::TPose2D& target)
 	{
 		ROS_INFO(
-			"[navigateTo] Starting navigation to %s",
+			"[ReactiveNavNode::navigateTo] Starting navigation to %s",
 			target.asString().c_str());
 		
 		CAbstractPTGBasedReactive::TNavigationParamsPTG navParams;
@@ -494,7 +494,7 @@ class ReactiveNavNode
 	{
 		geometry_msgs::PoseStamped trg = *trg_ptr;
 		ROS_INFO(
-			"Nav target received via topic sub: (%.03f,%.03f, %.03fdeg) "
+			"[ReactiveNavNode::onRosGoalReceived] Nav target received via topic sub: (%.03f,%.03f, %.03fdeg) "
 			"[frame_id=%s]",
 			trg.pose.position.x, trg.pose.position.y,
 			trg.pose.orientation.z * 180.0 / M_PI, trg.header.frame_id.c_str());
@@ -515,7 +515,7 @@ class ReactiveNavNode
 			}
 		}
 			double yaw_angle = tf::getYaw(trg.pose.orientation);
-			ROS_INFO("[onRosGoalReceived]:: yaw_angle=%f", yaw_angle);
+			ROS_INFO("[ReactiveNavNode::onRosGoalReceived] yaw_angle=%f", yaw_angle);
 
 
 
@@ -533,7 +533,7 @@ class ReactiveNavNode
 
 	void onRosSetRobotShape(const geometry_msgs::PolygonConstPtr& newShape)
 	{
-		ROS_INFO_STREAM("[onRosSetRobotShape] Robot shape received via topic: " <<  *newShape );
+		ROS_INFO_STREAM("[ReactiveNavNode::onRosSetRobotShape] Robot shape received via topic: " <<  *newShape );
 
                 CReactiveNavigationSystem* rns2D = dynamic_cast<CReactiveNavigationSystem*>(m_reactive_nav_engine.get());
 
@@ -556,7 +556,7 @@ class ReactiveNavNode
 	// Not a callback. Used on constructor
 	void onRosSetRobotShape3D(const mrpt::nav::TRobotShape& newShape)
 	{
-		ROS_INFO_STREAM("[onRosSetRobotShape3D] Robot shape received via params");
+		ROS_INFO_STREAM("[ReactiveNavNode::onRosSetRobotShape3D] Robot shape received via params");
 		CReactiveNavigationSystem3D* rns3D = dynamic_cast<CReactiveNavigationSystem3D*>(m_reactive_nav_engine.get());
 		if (rns3D)
 		{
@@ -571,10 +571,10 @@ class ReactiveNavNode
 					double rad = newShape.getRadius(l);
 					for (int i = 0; i < x.size(); i++) 
 					{
-						ROS_INFO("[onRosSetRobotShape3D] level: %d, x:%f, y:%f",(int) l, x[i], y[i]);
+						ROS_INFO("[ReactiveNavNode::onRosSetRobotShape3D] level: %d, x:%f, y:%f",(int) l, x[i], y[i]);
 					}
-					ROS_INFO("[onRosSetRobotShape3D] level: %d, h:%f", (int) l, hei);
-					ROS_INFO("[onRosSetRobotShape3D] level: %d, r:%f", (int) l, rad);
+					ROS_INFO("[ReactiveNavNode::onRosSetRobotShape3D] level: %d, h:%f", (int) l, hei);
+					ROS_INFO("[ReactiveNavNode::onRosSetRobotShape3D] level: %d, r:%f", (int) l, rad);
 				}
             }
 		}

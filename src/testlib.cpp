@@ -27,11 +27,12 @@ namespace testlib
 		//TODO
 		// We're gonna send the goal to mrpt's reactive navigation engine and then receive the command from them.
 
-		if (m_is_reactive_mrpt_finished) 
-		{
-			endAllignment();
-		}else if (!m_g_plan.empty() && isNextWaypointNeeded()) 
-		{
+		if (m_is_reactive_mrpt_finished && !isNewGoalReceived()) 
+		{ 	// If here, mrpt has ended, the goal has not changed from previous plan and is the last one.
+			// So, we only need to align the robot to the goal.
+			endAlignment();
+		} else if (!m_g_plan.empty() && isNextWaypointNeeded()) 
+		{	// A new waypoint is needed. This starts a new navigation.
 			int ind;
 			m_localnh.param("index_waypoint", ind,WAYPOINT_INDEX);
 			m_is_last_waypoint = m_g_plan.size() <= ind;
@@ -44,9 +45,11 @@ namespace testlib
 		}
 
 		cmd_vel = m_cmd_vel;
-
-		return isInGoalPosition() || cmd_vel.linear.x >= MIN_VEL_VALUE 
+		bool not_clear_costmap = isInGoalPosition() || cmd_vel.linear.x >= MIN_VEL_VALUE 
 			|| cmd_vel.angular.z >= MIN_VEL_VALUE;
+		if (!not_clear_costmap)
+			m_is_reactive_mrpt_finished = false;
+		return not_clear_costmap;
 	};
 
 	bool MyNavigator::isInGoalPosition()
@@ -120,7 +123,14 @@ namespace testlib
 		m_localnh.param(
 			"target_allowed_distance", m_target_allowed_distance,
 			m_target_allowed_distance);
-		
+		m_target_allowed_radians = 0.04;
+		m_localnh.param(
+			"target_allowed_radians", m_target_allowed_radians,
+			m_target_allowed_radians);
+		m_alignment_command = 0.3;
+		m_localnh.param(
+			"target_alignment_cmd_vel", m_alignment_command,
+		m_alignment_command);
 		m_localnh.param(
 			"index_waypoint", WAYPOINT_INDEX,
 			50);
@@ -172,25 +182,36 @@ namespace testlib
 	{
 		m_cmd_vel = cmd_vel;
 	}
-	void MyNavigator::endNavigationCallback(const std_msgs::Bool&)
+	void MyNavigator::endNavigationCallback(const std_msgs::Bool& msg)
 	{
-		m_is_reactive_mrpt_finished = true;
+		m_is_reactive_mrpt_finished = msg.data;
 	}
-	bool MyNavigator::endAllignment()
+	bool MyNavigator::endAlignment()
 	{
-		ROS_INFO("[MyNavigator::endAllignment] MRPT has finished, plugin is aligning to pose goal. Please wait.");
+		ROS_INFO("[MyNavigator::endAlignment] MRPT has finished, plugin is aligning to pose goal. Please wait.");
 		geometry_msgs::Twist cmd_vel;
 		tf::Quaternion q = m_current_pose.getRotation(); 
 		double yaw_curr = tf::getYaw(q), yaw_goal = tf::getYaw(m_waypoint.pose.orientation);
-		double dist= yaw_curr - yaw_goal;
-		if (dist > 0.04) 
+		double dist= fmin(yaw_curr - yaw_goal, M_PI + yaw_goal - yaw_curr);
+		if (dist > m_target_allowed_radians) 
 		{
-			cmd_vel.angular.z = -0.2;
-		} else if (dist < -0.04) 
+			cmd_vel.angular.z = -m_alignment_command;
+		} else if (dist < -m_target_allowed_radians) 
 		{
-			cmd_vel.angular.z = 0.2;
+			cmd_vel.angular.z = m_alignment_command;
 		}
 		m_cmd_vel = cmd_vel;
+	}
+	bool MyNavigator::isNewGoalReceived() {
+		auto last_pose_plan = m_g_plan[m_g_plan.size() - 1];
+		double x=last_pose_plan.pose.position.x - m_waypoint.pose.position.x;
+		double y=last_pose_plan.pose.position.y - m_waypoint.pose.position.y;
+		double yaw_new = tf::getYaw(last_pose_plan.pose.orientation);
+		double yaw_curr = tf::getYaw(m_waypoint.pose.orientation);
+		double a = yaw_new - yaw_curr,b = M_PI + yaw_curr - yaw_new;
+		double radians_diff = sqrt(fmin(a*a, b*b));
+		return sqrt(x*x + y*y) > m_target_allowed_distance 
+			&& radians_diff > m_target_allowed_radians;
 	}
 };
 

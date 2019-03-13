@@ -52,6 +52,8 @@ namespace testlib // this namespace will be changed.
 			tf::TransformListener* m_tf;
 			
 			double m_target_allowed_distance;
+			double m_target_allowed_radians;
+			double m_alignment_command;
 			bool m_robot_pose_initialized;
 			bool m_is_last_waypoint;
 			bool m_is_received_path;
@@ -63,7 +65,8 @@ namespace testlib // this namespace will be changed.
 			bool isWaypointReached();
 			bool isNextWaypointNeeded();
 			bool isInGoalPosition();
-			bool endAllignment();
+			bool isNewGoalReceived();
+			bool endAlignment();
 		public:
 			/**
 			* @brief  Default constructor for the ros wrapper
