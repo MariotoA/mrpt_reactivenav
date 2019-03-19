@@ -224,7 +224,7 @@ class ReactiveNavNode
 			geometry_msgs::Twist cmd;
 			cmd.linear.x = 0;
 			cmd.angular.z = 0;
-			//m_parent.m_pub_cmd_vel.publish(cmd);
+			m_parent.m_pub_cmd_vel.publish(cmd);
 			
 			return true ; //changeSpeeds(vel_cmd);
 		}
