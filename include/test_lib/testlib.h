@@ -43,7 +43,8 @@ namespace testlib // this namespace will be changed.
 			// Pointer to current cmd_vel.
 			geometry_msgs::Twist m_cmd_vel;
 			// Constant to access global path.
-			int WAYPOINT_INDEX; //300// If it is lower it does not work for me.
+			int WAYPOINT_INDEX_INCREMENT; //300// If it is lower it does not work for me.
+			int m_waypoint_index; // The starting waypoint for navigation. Each iteration will be incremented by WAYPOINT_INDEX_INCREMENT
 			// Constant minimum vel command values allowed
 			const double MIN_VEL_VALUE = .001; // Less than this is not showed by ReactiveNavEngine debug output.
 			// Costmap received from global planner

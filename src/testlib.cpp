@@ -33,11 +33,12 @@ namespace testlib
 			endAlignment();
 		} else if (!m_g_plan.empty() && isNextWaypointNeeded()) 
 		{	// A new waypoint is needed. This starts a new navigation.
-			int ind;
-			m_localnh.param("index_waypoint", ind,WAYPOINT_INDEX);
-			m_is_last_waypoint = m_g_plan.size() <= ind;
-			ind = m_is_last_waypoint ? m_g_plan.size() - 1 : ind;
-			m_waypoint=m_g_plan[ind];
+			int inc;
+			m_localnh.param("index_waypoint", inc,WAYPOINT_INDEX_INCREMENT);
+			m_waypoint_index += inc;
+			m_is_last_waypoint = m_g_plan.size() <= m_waypoint_index;
+			m_waypoint_index = m_is_last_waypoint ? m_g_plan.size() - 1 : m_waypoint_index;
+			m_waypoint=m_g_plan[m_waypoint_index];
 			ROS_INFO("\n\n[MyNavigator::computeVelocityCommands] sending goal to reactive navigator: Pose[x:%f,y:%f,z:%f]",
 			 m_waypoint.pose.position.x,m_waypoint.pose.position.y,m_waypoint.pose.orientation.z);
 			m_goal_pub.publish(m_waypoint);
@@ -95,6 +96,7 @@ namespace testlib
 		m_is_received_path = true;
 		m_g_plan.clear();
 		m_g_plan = plan;
+		m_waypoint_index=0;
 		return true;
 	};
 
@@ -132,9 +134,10 @@ namespace testlib
 			"target_alignment_cmd_vel", m_alignment_command,
 		m_alignment_command);
 		m_localnh.param(
-			"index_waypoint", WAYPOINT_INDEX,
+			"index_waypoint", WAYPOINT_INDEX_INCREMENT,
 			50);
-		ROS_INFO("[MyNavigator::initialize] WAYPOINT_INDEX: %d", WAYPOINT_INDEX);
+		ROS_INFO("[MyNavigator::initialize] WAYPOINT_INDEX_INCREMENT: %d", WAYPOINT_INDEX_INCREMENT);
+		m_waypoint_index = 0;
 		// Check and get topic name where reactive engine will publish vel commands.
 		std::string topic_cmd_vel = "cmd_vel";
 		m_localnh.param("topic_cmd_vel", topic_cmd_vel,topic_cmd_vel);
