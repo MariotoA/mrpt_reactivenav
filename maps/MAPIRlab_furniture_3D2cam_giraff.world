@@ -161,7 +161,7 @@ define table model
 
 define robotBase position      # Mobile robot base.
 (
-  size [0.450 0.450 1.500]
+  size [0.450 0.450 1.660]
   origin [0.000 0.000 0.000 0.000]
   gui_nose 1
   drive "diff"
@@ -169,43 +169,61 @@ define robotBase position      # Mobile robot base.
   # This block approximates a circular shape of a Robot
   # The robot shapes is then a circle scalated to the "size" bounding box
   block( points 16
-    point[0] [ 0.225 0.000 ]
-    point[1] [ 0.208 0.086 ]
-    point[2] [ 0.159 0.159 ]
-    point[3] [ 0.086 0.208 ]
-    point[4] [ 0.000 0.225 ]
-    point[5] [ -0.086 0.208 ]
-    point[6] [ -0.159 0.159 ]
-    point[7] [ -0.208 0.086 ]
-    point[8] [ -0.225 0.000 ]
-    point[9] [ -0.208 -0.086 ]
-    point[10] [ -0.159 -0.159 ]
-    point[11] [ -0.086 -0.208 ]
-    point[12] [ -0.000 -0.225 ]
-    point[13] [ 0.086 -0.208 ]
-    point[14] [ 0.159 -0.159 ]
-    point[15] [ 0.208 -0.086 ]
-    z [0 0.33] # This is the block's height interval.
+point[0] [0.26 0.0]
+point[1] [0.240208678453 0.0994976924149]
+point[2] [0.183847763109 0.183847763109]
+point[3] [0.0994976924149 0.240208678453]
+point[4] [0.0 0.26]
+point[5] [-0.0994976924149 0.240208678453]
+point[6] [-0.183847763109 0.183847763109]
+point[7] [-0.240208678453 0.0994976924149]
+point[8] [-0.26 0.0]
+point[9] [-0.240208678453 -0.0994976924149]
+point[10] [-0.183847763109 -0.183847763109]
+point[11] [-0.0994976924149 -0.240208678453]
+point[12] [0.0 -0.26]
+point[13] [0.0994976924149 -0.240208678453]
+point[14] [0.183847763109 -0.183847763109]
+point[15] [0.240208678453 -0.0994976924149]
+
+
+
+    z [0.15 0.38] # This is the block's height interval.
   )
   
 	block ( points 4
-		point[0] [0.100 0.100]
-		point[1] [0.100 -0.100]
-		point[2] [-0.100 -0.100]
-		point[3] [-0.100 0.100]
-		z [0.33 1]
+		point[0] [0.150 0.100]
+		point[1] [0.150 -0.100]
+		point[2] [-0.150 -0.100]
+		point[3] [-0.150 0.100]
+		z [0.38 0.83]
+	)
+
+	block ( points 4
+		point[0] [0.025 0.025]
+		point[1] [0.025 -0.025]
+		point[2] [-0.025 -0.025]
+		point[3] [-0.025 0.025]
+		z [0.83 1.28]
+	)
+
+	block ( points 4
+		point[0] [0.025 0.115]
+		point[1] [0.025 -0.115]
+		point[2] [-0.025 -0.115]
+		point[3] [-0.025 0.115]
+		z [1.28 1.66]
 	)
 
 
-
   # Add a laser
-  #LaserFront(pose [ 0.10 0.000 -0.500 0.000 ])    #pose in its parent's coordinate system
+  LaserFront(pose [ 0.100 0.000 -0.500 0.000 ])    #pose in its parent's coordinate system
   # Add a laser
-  LaserFront(pose [ 0.210 0.000 -1.250 0.000 ])    #pose in its parent's coordinate system
+  LaserFront(pose [ 0.210 0.000 -1.380 0.000 ])    #pose in its parent's coordinate system
   
   #Add a camera
-  CameraFrontTilted(pose [-0.200 0.000 0.600 0.000 0 0])    #pose in its parent's coordinate system
-  CameraFront(pose [-0.200 0.000 -0.600 0.000])
+  CameraFrontTilted(pose [0.000 0.000 0.000 0.000 0 0])    #pose in its parent's coordinate system
+  CameraFront(pose [0.000 0.000 -0.800 0.000])
   #LOCALIZATION
   # Report error-free position in world coordinates
   localization "gps"
@@ -241,14 +259,14 @@ floorMap                     # load an environment bitmap
 )
 
 # throw in a robot
-robotBase( pose [ -3.274 0.198 0.000 -77.705 ] name "SimRobot" color "orange")
+robotBase( pose [ 2.926 1.598 0.000 -77.705 ] name "SimRobot" color "orange")
 # 2 3 <- initial
 #-3.75 2.17 <- between the "chairs"
 #chair (pose [-3.78 1.47 0.0 90 ] name "ObstacleChair0" color "red")
 #chair (pose [-3.78 2.81 0.0 90 ] name "ObstacleChair1" color "red")
 tableLeg (pose [-3.118 3.009 0.000 90.000 ] name "LeftTableLeg" color "red")
 tableLeg (pose [-1.931 3.062 0.000 90.000 ] name "RightTableLeg" color "red")
-table (pose [-2.450 3.083 0.800 90.000 ] name "Table" color "red")
+table (pose [-2.450 3.083 1.000 90.000 ] name "Table" color "red")
 
 
 tableLegSlim (pose [-10.186 4.812 0.000 90.000 ] name "LeftTableLeg" color "red")
