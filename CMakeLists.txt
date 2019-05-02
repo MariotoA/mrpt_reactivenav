@@ -4,6 +4,7 @@ project(mrpt_reactivenav CXX)
 
 set(CMAKE_BUILD_TYPE "Debug")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g")
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
 message(STATUS "Flags: " ${CMAKE_CXX_FLAGS})

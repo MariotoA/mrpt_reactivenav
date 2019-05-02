@@ -57,9 +57,10 @@ define LaserFront ranger          # Infra-red (IR) range sensor
 
 define CameraFront camera          # RGB camera
 (
-  resolution [80 60]  #[640 480]   #width,height (px)
-  range [0.1 3.5]        #(m) min, max min (0.2)
+  resolution [80 60]  #width,height (px)
+  range [0.4 3.5]        #(m) min, max min (0.2)
   fov [ 58.0 45.0 ]    #horizonal, vertical
+  pose [1 1 0 0]
   pantilt [0.0 0.0 ]   #degrees
   # generic model properties
   color "red"
@@ -68,10 +69,10 @@ define CameraFront camera          # RGB camera
 
 define CameraFrontTilted camera          # RGB camera
 (
-  resolution [80 60]  #[640 480]   #width,height (px)
+  resolution [640 480]   #width,height (px)
   range [0.1 3.5]        #(m) min, max
   fov [ 58.0 45.0 ]    #horizonal, vertical
-  pantilt [ 0.0 60.0 ]   #degrees
+  pantilt [ 0.0 50.0 ]   #degrees
   
   # generic model properties
   color "red"
@@ -217,12 +218,12 @@ point[15] [0.240208678453 -0.0994976924149]
 
 
   # Add a laser
-  LaserFront(pose [ 0.100 0.000 -0.500 0.000 ])    #pose in its parent's coordinate system
+  # LaserFront(pose [ 0.100 0.000 -0.500 0.000 ])    #pose in its parent's coordinate system
   # Add a laser
   LaserFront(pose [ 0.210 0.000 -1.380 0.000 ])    #pose in its parent's coordinate system
   
   #Add a camera
-  CameraFrontTilted(pose [0.000 0.000 0.000 0.000 0 0])    #pose in its parent's coordinate system
+  CameraFrontTilted(pose [0.000 0.000 0.000 0.000])    #pose in its parent's coordinate system
   CameraFront(pose [0.000 0.000 -0.800 0.000])
   #LOCALIZATION
   # Report error-free position in world coordinates
@@ -232,6 +233,7 @@ point[15] [0.240208678453 -0.0994976924149]
   # Some more realistic localization error
   #localization "odom"
   #odom_error [ 0.01 0.01 0.0 0.1 ]
+
 )
 
 
@@ -259,14 +261,14 @@ floorMap                     # load an environment bitmap
 )
 
 # throw in a robot
-robotBase( pose [ 2.926 1.598 0.000 -77.705 ] name "SimRobot" color "orange")
+robotBase( pose [ -2.310 4.135 0.000 -77.705 ] name "SimRobot" color "orange")
 # 2 3 <- initial
 #-3.75 2.17 <- between the "chairs"
 #chair (pose [-3.78 1.47 0.0 90 ] name "ObstacleChair0" color "red")
 #chair (pose [-3.78 2.81 0.0 90 ] name "ObstacleChair1" color "red")
 tableLeg (pose [-3.118 3.009 0.000 90.000 ] name "LeftTableLeg" color "red")
 tableLeg (pose [-1.931 3.062 0.000 90.000 ] name "RightTableLeg" color "red")
-table (pose [-2.450 3.083 1.000 90.000 ] name "Table" color "red")
+table (pose [-2.506 3.233 1.000 90.000 ] name "Table" color "red")
 
 
 tableLegSlim (pose [-10.186 4.812 0.000 90.000 ] name "LeftTableLeg" color "red")

@@ -486,7 +486,6 @@ class ReactiveNavNode
 		}
 
 		CTimeLoggerEntry tle(m_profiler, "onDoNavigation");
-
 		m_reactive_nav_engine->navigationStep();
 	}
 	
