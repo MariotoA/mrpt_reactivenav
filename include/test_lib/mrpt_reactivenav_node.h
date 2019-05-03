@@ -37,6 +37,7 @@
 #include <std_msgs/Bool.h>
 #include <sensor_msgs/LaserScan.h>
 #include <sensor_msgs/PointCloud.h>
+#include <sensor_msgs/PointCloud2.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Polygon.h>
 #include <nav_msgs/Odometry.h>
@@ -69,6 +70,7 @@ using namespace mrpt::utils;
 
 #include <mrpt_bridge/pose.h>
 #include <mrpt_bridge/point_cloud.h>
+#include <mrpt_bridge/point_cloud2.h>
 #include <mrpt_bridge/time.h>
 
 #include <mrpt/kinematics/CVehicleVelCmd_DiffDriven.h>
@@ -421,7 +423,7 @@ class ReactiveNavNode
 		m_sub_nav_goal = m_nh.subscribe<geometry_msgs::PoseStamped>(
 			m_pub_topic_reactive_nav_goal, 1,
 			&ReactiveNavNode::onRosGoalReceived, this);
-		m_sub_local_obs = m_nh.subscribe<sensor_msgs::PointCloud>(
+		m_sub_local_obs = m_nh.subscribe<sensor_msgs::PointCloud2>(
 			m_sub_topic_local_obstacles, 1,
 			&ReactiveNavNode::onRosLocalObstacles, this);
 
@@ -522,10 +524,10 @@ class ReactiveNavNode
 			this->navigateTo(mrpt::math::TPose2D(trg.pose.position.x, trg.pose.position.y, yaw_angle));
 	}
 
-	void onRosLocalObstacles(const sensor_msgs::PointCloudConstPtr& obs)
+	void onRosLocalObstacles(const sensor_msgs::PointCloud2ConstPtr& obs)
 	{
 		std::lock_guard<std::mutex> csl(m_last_obstacles_cs);
-		mrpt_bridge::point_cloud::ros2mrpt(*obs, m_last_obstacles);
+		mrpt_bridge::copy(*obs, m_last_obstacles);
 		// ROS_DEBUG("Local obstacles received: %u points", static_cast<unsigned
 		// int>(m_last_obstacles.size()) );
 	}
