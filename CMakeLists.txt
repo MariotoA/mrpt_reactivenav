@@ -72,6 +72,12 @@ target_link_libraries(mrpt_reactivenav_node
   ${MRPT_LIBS}
 )
 
+add_library(mrpt_reactivenav_nodelet src/mrpt_reactivenav_node.cpp)
+add_dependencies(mrpt_reactivenav_nodelet ${catkin_EXPORTED_TARGETS} ${MPRT_EXPORTED_TARGETS})
+target_link_libraries(mrpt_reactivenav_nodelet
+${INCLUDE} ${MRPT_LIBRARIES} ${catkin_LIBRARIES})
+
+
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(mrpt_reactivenav2d_node mrpt_reactivenav2d_generate_messages_cpp)

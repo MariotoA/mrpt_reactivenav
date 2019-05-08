@@ -38,7 +38,7 @@
     </include>
     <include file="$(find tfg_reactive_pkg)/launch/simbot_fake_loc.launch" />
   
-	<node pkg="nodelet" type="nodelet" name="mrpt_local_obstacles" args="standalone mrpt_local_obstacles/mrpt_local_obstacles_nodelet">
+	<node pkg="nodelet" type="nodelet" name="mrpt_local_obstacles" args="standalone mrpt_local_obstacles/mrpt_local_obstacles_nodelet" launch-prefix="xterm -e" output="screen">
     	<param name="source_topics_depthcam" value="points_0,points_1"/>
 		<param name="source_topics_2dscan" value="laser_scan"/>
 		<param name="time_window" value="5" />
