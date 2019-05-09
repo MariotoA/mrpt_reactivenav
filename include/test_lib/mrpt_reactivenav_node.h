@@ -79,6 +79,7 @@ using namespace mrpt::utils;
 
 #include "shape_publisher3D.h"
 #include <mrpt/nav/reactive/TWaypoint.h>
+#include "mrpt_local_obstacles_node.cpp"
 // The ROS node
 class ReactiveNavNode
 {
@@ -123,8 +124,21 @@ class ReactiveNavNode
 
 	bool m_save_nav_log;
 	ros::Timer m_timer_run_nav;
-	CSimplePointsMap m_last_obstacles;
+	//CSimplePointsMap m_last_obstacles;
+	LocalObstaclesNode obstacles;
 	std::mutex m_last_obstacles_cs;
+
+	/**
+	 * 
+	 * 
+	 * 
+	 *  MRPT LOCAL OBSTACLES PARAMETERS 
+	 * 
+	 * 
+	 * 
+	 **/
+
+
 
 	struct MyReactiveInterface :
 
@@ -246,7 +260,7 @@ class ReactiveNavNode
 		{
 			timestamp = mrpt::system::now();
 			std::lock_guard<std::mutex> csl(m_parent.m_last_obstacles_cs);
-			obstacles = m_parent.m_last_obstacles;
+			obstacles = m_parent.obstacles.m_localmap_pts;
 
 			MRPT_TODO("TODO: Check age of obstacles!");
 			return true;
@@ -324,7 +338,8 @@ class ReactiveNavNode
 		  m_frameid_reference("/map"),
 		  m_frameid_robot("base_link"),
 		  m_save_nav_log(false),
-		  m_reactive_if(*this)
+		  m_reactive_if(*this),
+		  obstacles(argc,argv,m_nh,m_localn)
 	{
 		// Load params:
 		std::string cfg_file_reactive;
@@ -423,9 +438,9 @@ class ReactiveNavNode
 		m_sub_nav_goal = m_nh.subscribe<geometry_msgs::PoseStamped>(
 			m_pub_topic_reactive_nav_goal, 1,
 			&ReactiveNavNode::onRosGoalReceived, this);
-		m_sub_local_obs = m_nh.subscribe<sensor_msgs::PointCloud2>(
+		/*m_sub_local_obs = m_nh.subscribe<sensor_msgs::PointCloud2>(
 			m_sub_topic_local_obstacles, 1,
-			&ReactiveNavNode::onRosLocalObstacles, this);
+			&ReactiveNavNode::onRosLocalObstacles, this);*/
 
 		// Init timers:
 		// ----------------------------------------------------
@@ -524,13 +539,13 @@ class ReactiveNavNode
 			this->navigateTo(mrpt::math::TPose2D(trg.pose.position.x, trg.pose.position.y, yaw_angle));
 	}
 
-	void onRosLocalObstacles(const sensor_msgs::PointCloud2ConstPtr& obs)
+	/*void onRosLocalObstacles(const sensor_msgs::PointCloud2ConstPtr& obs)
 	{
 		std::lock_guard<std::mutex> csl(m_last_obstacles_cs);
 		mrpt_bridge::copy(*obs, m_last_obstacles);
 		// ROS_DEBUG("Local obstacles received: %u points", static_cast<unsigned
 		// int>(m_last_obstacles.size()) );
-	}
+	}*/
 
 	void onRosSetRobotShape(const geometry_msgs::PolygonConstPtr& newShape)
 	{

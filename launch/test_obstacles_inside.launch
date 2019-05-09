@@ -1,0 +1,58 @@
+<!-- Launch file principal para lanzar una simulación con Stage + MoveBse -->
+
+<launch>    
+
+	<arg name="map_file" default="" />
+    ### ROBOT SIMULATION ###
+    <param name="use_sim_time" value="true" />
+    <include file="$(find mrpt_reactivenav)/launch/simbot_stage.launch" >
+        <arg name="world_file" value="-d $(find mrpt_reactivenav)/maps/MAPIRlab_furniture_3D2cam_giraff.world" />
+        <arg name="disable_odometry" value="false" />
+    </include>      
+    
+  <node pkg="nodelet" type="nodelet" args="manager" name="record_player_manager" output="screen"/>
+  
+
+  <include file="$(find tfg_reactive_pkg)/launch/proc_depth_image.launch"> 
+			<arg name="topic_cloud" value="/depth_0" />
+			<arg name="topic_camera_info" value="/camera_info_0" />
+			<arg name="topic_out_pc" value="/points_0" />
+			
+			<arg name="name_nodelet" value="0" />
+   </include>
+
+ <!--   <include file="$(find tfg_reactive_pkg)/launch/proc_depth_image.launch"> 
+			<arg name="topic_cloud" value="/depth_1" />
+			<arg name="topic_camera_info" value="/camera_info_1" />
+			<arg name="topic_out_pc" value="/points_1" />
+			
+			<arg name="name_nodelet" value="1" />
+    </include>-->
+    
+    ### URDF model "r2d2" ###
+    <include file="$(find tfg_reactive_pkg)/launch/simbot_urdf.launch" />
+    
+    ### NAVIGATION ###
+    <include file="$(find tfg_reactive_pkg)/launch/simbot_map_server.launch">
+        <arg name="map_file" value="$(find mrpt_reactivenav)/maps/MAPIRlab_furniture_3D.yaml" />
+    </include>
+    <include file="$(find tfg_reactive_pkg)/launch/simbot_fake_loc.launch" />
+  
+    	<param name="source_topics_depthcam" value="points_0,points_1"/>
+		<param name="source_topics_2dscan" value="laser_scan"/>
+		<param name="time_window" value="5" />
+		<param name="show_gui" value="true"/>
+
+
+	<!-- <param name="source_topics_depthcam" value="points_0, points_1"/> -->
+    <node pkg="keyboard_control" type="keyboard_control" name="keyboard_control" />
+	<include file="$(find mrpt_reactivenav)/launch/simbot_move_base.launch">
+		<arg name="nav_type" value="3D"/>
+		<arg name="config_reactive_file" value="$(find mrpt_reactivenav)/tutorial/reactive3d_custom_config_giraff.ini"/>
+		<arg name="shape3D_file" value="$(find shape_publisher)/shape_file/giraff3D.yaml" />
+	</include>
+    ### RVIZ ###
+    <node name="rviz_player" pkg="rviz" type="rviz" args="-d $(find mrpt_reactivenav)/cfg/rvizco.rviz"/>
+	
+
+</launch>

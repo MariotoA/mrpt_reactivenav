@@ -24,11 +24,14 @@ find_package(catkin REQUIRED COMPONENTS
   pluginlib
   nav_core
   shape_publisher
+  pcl_ros
+  laser_geometry
+
 )
 
 ## System dependencies are found with CMake's conventions
 # find_package(MRPT REQUIRED base reactivenav kinematics)
-find_package(MRPT REQUIRED nav kinematics)
+find_package(MRPT REQUIRED nav kinematics obs maps gui)
 MESSAGE( STATUS "MRPT_VERSION: ${MRPT_VERSION}")
 MESSAGE( STATUS "MRPT_INCLUDE_DIRS: ${MRPT_INCLUDE_DIRS}")
 

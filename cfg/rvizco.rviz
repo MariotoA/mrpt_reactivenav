@@ -40,7 +40,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: PointCloud2
+    SyncSource: ""
 Visualization Manager:
   Class: ""
   Displays:
@@ -453,8 +453,6 @@ Visualization Manager:
           Value: false
         body:
           Value: false
-        camera_0:
-          Value: true
         green_button:
           Value: false
         head:
@@ -496,8 +494,6 @@ Visualization Manager:
                         {}
                   red_button:
                     {}
-                camera_0:
-                  {}
                 hokuyo_front:
                   {}
                 laser_stage:
@@ -672,7 +668,7 @@ Visualization Manager:
       Color: 255; 0; 127
       Color Transformer: FlatColor
       Decay Time: 0
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 4096
@@ -689,7 +685,7 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: true
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 190; 184; 177
@@ -754,5 +750,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1366
-  X: 0
-  Y: 25
+  X: 1678
+  Y: 189
