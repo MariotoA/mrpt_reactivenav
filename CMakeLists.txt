@@ -61,16 +61,18 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   ${MRPT_INCLUDE_LIBS}
 )
-add_library(test_lib src/testlib.cpp)
-add_dependencies(test_lib ${catkin_EXPORTED_TARGETS} ${MPRT_EXPORTED_TARGETS})
-target_link_libraries(test_lib ${INCLUDE} ${MRPT_LIBRARIES} ${catkin_LIBRARIES})
-
 
 add_executable(mrpt_reactivenav_node src/mrpt_reactivenav_node.cpp)
 target_link_libraries(mrpt_reactivenav_node
   ${catkin_LIBRARIES}
   ${MRPT_LIBS}
 )
+
+
+add_library(test_lib src/testlib.cpp src/mrpt_reactivenav_node.cpp)
+add_dependencies(test_lib ${catkin_EXPORTED_TARGETS} ${MPRT_EXPORTED_TARGETS})
+target_link_libraries(test_lib ${INCLUDE} ${MRPT_LIBRARIES} ${catkin_LIBRARIES})
+
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes

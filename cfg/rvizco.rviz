@@ -4,6 +4,7 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
+        - /RobotModel1
         - /LaserScan1
         - /local_obstacles1
         - /TF1/Frames1
@@ -365,7 +366,7 @@ Visualization Manager:
           Scale: 1
           Value: true
         Value: true
-      Enabled: false
+      Enabled: true
       Keep: 100
       Name: Odometry
       Position Tolerance: 0.100000001
@@ -379,9 +380,9 @@ Visualization Manager:
         Shaft Length: 0.100000001
         Shaft Radius: 0.0500000007
         Value: Arrow
-      Topic: /base_pose_ground_truth
+      Topic: /odom
       Unreliable: false
-      Value: false
+      Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -448,33 +449,33 @@ Visualization Manager:
       Frames:
         All Enabled: false
         base_footprint:
-          Value: false
+          Value: true
         base_link:
           Value: false
         body:
-          Value: false
+          Value: true
         camera_0:
           Value: true
         green_button:
-          Value: false
+          Value: true
         head:
           Value: false
         hokuyo_front:
-          Value: false
+          Value: true
         laser_stage:
           Value: true
         left_wheel:
-          Value: false
+          Value: true
         map:
           Value: false
         neck:
-          Value: false
+          Value: true
         odom:
           Value: false
         red_button:
-          Value: false
+          Value: true
         right_wheel:
-          Value: false
+          Value: true
         screen:
           Value: false
       Marker Scale: 1
@@ -555,8 +556,7 @@ Visualization Manager:
         Camera: true
         DepthCloud: true
         Global Map:
-          Costmap: true
-          Planner: true
+          "": true
           Value: true
         GlobalPlan: true
         Goal: true
@@ -690,6 +690,40 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
+    - Angle Tolerance: 0.100000001
+      Class: rviz/Odometry
+      Covariance:
+        Orientation:
+          Alpha: 0.5
+          Color: 255; 255; 127
+          Color Style: Unique
+          Frame: Local
+          Offset: 1
+          Scale: 1
+          Value: true
+        Position:
+          Alpha: 0.300000012
+          Color: 204; 51; 204
+          Scale: 1
+          Value: true
+        Value: true
+      Enabled: false
+      Keep: 100
+      Name: Odometry
+      Position Tolerance: 0.100000001
+      Shape:
+        Alpha: 1
+        Axes Length: 1
+        Axes Radius: 0.100000001
+        Color: 255; 25; 0
+        Head Length: 0.300000012
+        Head Radius: 0.100000001
+        Shaft Length: 1
+        Shaft Radius: 0.0500000007
+        Value: Arrow
+      Topic: /odom
+      Unreliable: false
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 190; 184; 177
@@ -714,25 +748,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 4.11490202
+      Distance: 7.07140303
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -2.74377012
-        Y: 3.53965712
-        Z: -4.847542e-05
+        X: -2.71074486
+        Y: 1.76344109
+        Z: -4.72833271e-05
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.565203667
+      Pitch: 0.565203846
       Target Frame: <Fixed Frame>
       Value: XYOrbit (rviz)
-      Yaw: 2.85355949
+      Yaw: 3.0435605
     Saved: ~
 Window Geometry:
   Camera:
@@ -744,7 +778,7 @@ Window Geometry:
   Hide Right Dock: false
   Image:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd0000000400000000000002570000026efc0200000007fb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c00610079007301000000430000026e000000e300fffffffb0000001800440065007000740068002d00430061006d0065007200610000000302000000c90000000000000000fb0000000c00430061006d00650072006100000001fa000000b70000001600fffffffb0000000c00430061006d0065007200610200000000000001750000016a0000018500000001000001610000026efc0200000005fc000000430000026e0000000000fffffffaffffffff0100000002fb0000000a0049006d0061006700650000000000ffffffff0000005700fffffffb0000001200530065006c0065006300740069006f006e02000002e500000092000001610000026efb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb00000014005200470042002d00430061006d0065007200610000000043000003880000000000000000fb0000000a00560069006500770073000000005f0000036c000000b300fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000690000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004a00000003efc0100000002fb0000000800540069006d00650000000000000004a00000022300fffffffb0000000800540069006d00650100000000000004500000000000000000000002f90000026e00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000400000000000002570000026efc0200000007fb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c00610079007301000000430000026e000000e300fffffffb0000001800440065007000740068002d00430061006d0065007200610000000302000000c90000000000000000fb0000000c00430061006d00650072006100000001fa000000b70000001600fffffffb0000000c00430061006d0065007200610200000000000001db000002830000009200000001000001610000026efc0200000005fc000000430000026e0000000000fffffffaffffffff0100000002fb0000000a0049006d0061006700650000000000ffffffff0000005700fffffffb0000001200530065006c0065006300740069006f006e02000002e500000092000001610000026efb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb00000014005200470042002d00430061006d0065007200610000000043000003880000000000000000fb0000000a00560069006500770073000000005f0000036c000000b300fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000690000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004a00000003efc0100000002fb0000000800540069006d00650000000000000004a00000022300fffffffb0000000800540069006d00650100000000000004500000000000000000000002f90000026e00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
