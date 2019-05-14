@@ -142,10 +142,10 @@ namespace testlib
 		std::string topic_cmd_vel = "cmd_vel";
 		m_localnh.param("topic_cmd_vel", topic_cmd_vel,topic_cmd_vel);
 		// Subscribe to said topic and vincule callback
-		m_pub_cmd_vel = m_nh.subscribe<const geometry_msgs::Twist&>(topic_cmd_vel, 1,
+		m_sub_cmd_vel = m_nh.subscribe<const geometry_msgs::Twist&>(topic_cmd_vel, 1,
 			&MyNavigator::velocityCommandCallback, this);
 		
-		m_pub_end_nav_event = m_nh.subscribe<const std_msgs::Bool&>(topic_end_nav, 1,
+		m_sub_end_nav_event = m_nh.subscribe<const std_msgs::Bool&>(topic_end_nav, 1,
 			&MyNavigator::endNavigationCallback, this);
 		// flags initialization
 		m_is_last_waypoint = false;
@@ -195,13 +195,29 @@ namespace testlib
 		geometry_msgs::Twist cmd_vel;
 		tf::Quaternion q = m_current_pose.getRotation(); 
 		double yaw_curr = tf::getYaw(q), yaw_goal = tf::getYaw(m_waypoint.pose.orientation);
-		double dist= fmin(yaw_curr - yaw_goal, M_PI + yaw_goal - yaw_curr);
-		if (dist > m_target_allowed_radians) 
-		{
-			cmd_vel.angular.z = -m_alignment_command;
-		} else if (dist < -m_target_allowed_radians) 
+		bool is_curr_less = yaw_curr <= yaw_goal;
+		double diff;
+		if (is_curr_less) {
+			diff = yaw_goal - yaw_curr;
+			is_curr_less = diff <= -diff+2*M_PI;
+		} else {
+			diff = -yaw_goal + yaw_curr;
+			is_curr_less = diff > -diff+2*M_PI;
+		}
+		diff = fmin(diff, -diff+2*M_PI);
+		bool is_turning = abs(diff) > m_target_allowed_radians;
+		ROS_INFO("[MyNavigator::endAlignment] Yaw_current: %f, Yaw_goal: %f",
+		yaw_curr, yaw_goal);
+		if (is_turning && is_curr_less) 
 		{
 			cmd_vel.angular.z = m_alignment_command;
+
+			ROS_INFO("[MyNavigator::endAlignment] Left turn");
+		
+		} else if (is_turning)
+		{
+			cmd_vel.angular.z = -m_alignment_command;
+			ROS_INFO("[MyNavigator::endAlignment] Right turn");
 		}
 		m_cmd_vel = cmd_vel;
 	}

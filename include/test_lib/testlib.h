@@ -15,7 +15,8 @@ namespace testlib // this namespace will be changed.
 	/**
 	*	This class is a wrapper for ReactiveNavNode of mrpt navigation.
 	*	For now the name is just a placeholder.
-	*	Methods need to be filled looking at ReactiveNavNode, TrajectoryPlanner and TrajectoryPlannerROS
+	*	Methods need to be filled looking at ReactiveNavNode, 
+	*	inspired by TrajectoryPlanner and TrajectoryPlannerROS
 	*
 	*	TrajectoryPlannerRos: 
 	*	https://github.com/ros-planning/navigation/blob/kinetic-devel/base_local_planner/include/base_local_planner/trajectory_planner_ros.h
@@ -30,10 +31,14 @@ namespace testlib // this namespace will be changed.
 		private:
 			ReactiveNavNode *m_reactive;
 			ros::NodeHandle m_nh;
-			ros::NodeHandle m_localnh{"~"}; // this way it initializes non const static attributes.
+			ros::NodeHandle m_localnh{"~"}; // this is the way to initialize non const static attributes.
+			// Publisher object to send waypoints to mrpt's reactive navigator.
 			ros::Publisher m_goal_pub;
-			ros::Subscriber m_pub_cmd_vel;
-			ros::Subscriber m_pub_end_nav_event;
+			// Subscribers:
+			// Subscriber to receive velocity commands from mrpt's reactive navigator
+			ros::Subscriber m_sub_cmd_vel;
+			// Subscriber to receive end navigation event from mrpt's reactive navigator
+			ros::Subscriber m_sub_end_nav_event;
 			// The global plan sended by move_base.
 			std::vector<geometry_msgs::PoseStamped> m_g_plan;
 			// Robot pose. To check if waypoint is reached. TODO. Issue #9
@@ -42,19 +47,24 @@ namespace testlib // this namespace will be changed.
 			geometry_msgs::PoseStamped m_waypoint;
 			// Pointer to current cmd_vel.
 			geometry_msgs::Twist m_cmd_vel;
-			// Constant to access global path.
-			int WAYPOINT_INDEX_INCREMENT; //300// If it is lower it does not work for me.
+			// It is used to compute next waypoint from global plan.
+			int WAYPOINT_INDEX_INCREMENT;
 			int m_waypoint_index; // The starting waypoint for navigation. Each iteration will be incremented by WAYPOINT_INDEX_INCREMENT
 			// Constant minimum vel command values allowed
-			const double MIN_VEL_VALUE = .001; // Less than this is not showed by ReactiveNavEngine debug output.
-			// Costmap received from global planner
+			const double MIN_VEL_VALUE = .001; // Less than this is not showed by ReactiveNavEngine (MRPT) debug output.
+			// Costmap received from move_base
 			costmap_2d::Costmap2DROS* m_costmap_ros;
 			// tfListener to be used with cloudpoints
 			tf::TransformListener* m_tf;
 			
+			////////////////////// Parameters
+			// Tolerance for x,y (meters) in computing goal (waypoint) completion.
 			double m_target_allowed_distance;
+			// Tolerance for yaw (radians) in computing goal (waypoint) completion.
 			double m_target_allowed_radians;
+			// Current velocity command when aligning the robot with goal.
 			double m_alignment_command;
+			// Flags to control the wrapper state.
 			bool m_robot_pose_initialized;
 			bool m_is_last_waypoint;
 			bool m_is_received_path;
