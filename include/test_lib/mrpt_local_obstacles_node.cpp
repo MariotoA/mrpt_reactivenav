@@ -364,7 +364,7 @@ class LocalObstaclesNode
 			if (!m_hist_obs.empty())
 			{
 
-			ROS_INFO("[MRPTOBSTACLES] PURGING OBS");
+			//ROS_INFO("[MRPTOBSTACLES] PURGING OBS");
 				const double last_time = m_hist_obs.rbegin()->first;
 				TListObservations::iterator it_first_valid =
 					m_hist_obs.lower_bound(last_time - m_time_window);
@@ -436,7 +436,7 @@ class LocalObstaclesNode
 				else if (ipt.point_map)
 				{
 
-			ROS_INFO("[MRPTOBSTACLES] INSERTING MAP");
+			//ROS_INFO("[MRPTOBSTACLES] INSERTING MAP");
 					m_localmap_pts.insertAnotherMap(
 						ipt.point_map.get(), relPose);
 				}
@@ -451,7 +451,7 @@ class LocalObstaclesNode
 		}
 
 		// Publish them:
-		if (m_pub_local_map_pointcloud.getNumSubscribers() > 0)
+		/*if (m_pub_local_map_pointcloud.getNumSubscribers() > 0)
 		{
 			sensor_msgs::PointCloudPtr msg_pts =
 				sensor_msgs::PointCloudPtr(new sensor_msgs::PointCloud);
@@ -461,8 +461,8 @@ class LocalObstaclesNode
 				m_localmap_pts, msg_pts->header, *msg_pts);
 			m_pub_local_map_pointcloud.publish(msg_pts);
 
-			ROS_INFO("[MRPTOBSTACLES] PUBLISHING CLOUD");
-		}
+			//ROS_INFO("[MRPTOBSTACLES] PUBLISHING CLOUD");
+		}*/
 
 		// Show gui:
 		if (m_show_gui)

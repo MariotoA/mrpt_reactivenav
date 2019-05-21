@@ -21,13 +21,13 @@
 			<arg name="name_nodelet" value="0" />
    </include>
 
- <!--   <include file="$(find tfg_reactive_pkg)/launch/proc_depth_image.launch"> 
+ <include file="$(find tfg_reactive_pkg)/launch/proc_depth_image.launch"> 
 			<arg name="topic_cloud" value="/depth_1" />
 			<arg name="topic_camera_info" value="/camera_info_1" />
 			<arg name="topic_out_pc" value="/points_1" />
 			
 			<arg name="name_nodelet" value="1" />
-    </include>-->
+    </include>
     
     ### URDF model "r2d2" ###
     <include file="$(find tfg_reactive_pkg)/launch/simbot_urdf.launch" />
