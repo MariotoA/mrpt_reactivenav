@@ -109,7 +109,11 @@ namespace testlib
 		char *c = &x;
 		char **a = &c;
 		ROS_INFO("testlib::MyNavigator: INITIALISING FROM METHOD MyNavigator::initialize\n");
-		m_reactive = new ReactiveNavNode(0,a);
+		nodelet::M_string remap(ros::names::getRemappings());
+  		nodelet::V_string nargv;
+  		std::string nodelet_name = ros::this_node::getName();
+  		nodelet.load("/move_base", "mrpt_reactivenav/mrpt_reactivenav_nodelet",
+remap, nargv);
 		// Storing costmap and tf to obtain robot pose later
 		m_costmap_ros = costmap_ros;
 		m_costmap_ros->getRobotPose(m_current_pose);

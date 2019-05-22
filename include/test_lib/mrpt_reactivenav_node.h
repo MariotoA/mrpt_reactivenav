@@ -80,8 +80,10 @@ using namespace mrpt::utils;
 #include "shape_publisher3D.h"
 #include <mrpt/nav/reactive/TWaypoint.h>
 #include "mrpt_local_obstacles_node.cpp"
+#include <nodelet/nodelet.h>
 // The ROS node
-class ReactiveNavNode
+namespace local {
+class ReactiveNavNode : public nodelet::Nodelet
 {
    private:
 	struct TAuxInitializer
@@ -89,6 +91,11 @@ class ReactiveNavNode
 		TAuxInitializer(int argc, char** argv)
 		{
 			ros::init(argc, argv, "mrpt_reactivenav");
+		}
+
+		TAuxInitializer()
+		{
+			
 		}
 	};
 
@@ -125,7 +132,7 @@ class ReactiveNavNode
 	bool m_save_nav_log;
 	ros::Timer m_timer_run_nav;
 	//CSimplePointsMap m_last_obstacles;
-	LocalObstaclesNode obstacles;
+	std::unique_ptr<LocalObstaclesNode> obstacles;
 	std::mutex m_last_obstacles_cs;
 
 	/**
@@ -260,7 +267,7 @@ class ReactiveNavNode
 		{
 			timestamp = mrpt::system::now();
 			std::lock_guard<std::mutex> csl(m_parent.m_last_obstacles_cs);
-			obstacles = m_parent.obstacles.m_localmap_pts;
+			obstacles = m_parent.obstacles->m_localmap_pts;
 
 			MRPT_TODO("TODO: Check age of obstacles!");
 			return true;
@@ -323,6 +330,7 @@ class ReactiveNavNode
 
    public:
 	/**  Constructor: Inits ROS system */
+	ReactiveNavNode():m_reactive_if(*this){}
 	ReactiveNavNode(int argc, char** argv)
 		: m_auxinit(argc, argv),
 		  m_nh(),
@@ -338,8 +346,7 @@ class ReactiveNavNode
 		  m_frameid_reference("/map"),
 		  m_frameid_robot("base_link"),
 		  m_save_nav_log(false),
-		  m_reactive_if(*this),
-		  obstacles(argc,argv,m_nh,m_localn)
+		  m_reactive_if(*this)
 	{
 		// Load params:
 		std::string cfg_file_reactive;
@@ -449,6 +456,136 @@ class ReactiveNavNode
 			this);
 
 	}  // end ctor
+
+
+	virtual void onInit(){		
+		char x = 'a';
+		char *c = &x;
+		char **a = &c;
+  		m_nh = getMTNodeHandle();
+  		m_localn = getMTPrivateNodeHandle();
+		obstacles.reset(new LocalObstaclesNode(0,a,m_nh,m_localn));
+		  m_1st_time_init=false;
+		  m_target_allowed_distance= 0.40f;
+		  m_nav_period=0.100;
+		  m_pub_topic_reactive_nav_goal= "reactive_nav_goal";
+		  m_pub_topic_end_nav_event = "end_nav_event";
+		  m_sub_topic_local_obstacles="local_map_pointcloud";
+		  m_sub_topic_robot_shape = "";
+		  m_pub_topic_cmd_vel = "cmd_vel";
+		  m_frameid_reference = "/map";
+		  m_frameid_robot="base_link";
+		  m_save_nav_log=false;
+
+		  // Load params:
+		std::string cfg_file_reactive;
+        m_localn.param("nav_type", nav_type, nav_type); // could be 2D or 3D
+
+        if( nav_type == "2D" )
+        	m_reactive_nav_engine.reset(new CReactiveNavigationSystem(m_reactive_if));
+        else if ( nav_type == "3D" )
+        	m_reactive_nav_engine.reset(new CReactiveNavigationSystem3D(m_reactive_if));
+        else
+        {
+        	ROS_INFO("Incorrect navigation type. It should be 2D or 3D");
+        	return;
+        }
+		m_localn.param(
+			"cfg_file_reactive", cfg_file_reactive, cfg_file_reactive);
+		m_localn.param(
+			"target_allowed_distance", m_target_allowed_distance,
+			m_target_allowed_distance);
+		m_localn.param("nav_period", m_nav_period, m_nav_period);
+		m_localn.param(
+			"frameid_reference", m_frameid_reference, m_frameid_reference);
+		m_localn.param("frameid_robot", m_frameid_robot, m_frameid_robot);
+		m_localn.param(
+			"topic_robot_shape", m_sub_topic_robot_shape,
+			m_sub_topic_robot_shape);
+		m_localn.param(
+			"topic_relative_nav_goal", m_pub_topic_reactive_nav_goal,
+			m_pub_topic_reactive_nav_goal);
+		m_localn.param(
+			"topic_end_navigation", m_pub_topic_end_nav_event,
+			m_pub_topic_end_nav_event);
+		m_localn.param("save_nav_log", m_save_nav_log, m_save_nav_log);
+		m_localn.param("topic_cmd_vel", m_pub_topic_cmd_vel,m_pub_topic_cmd_vel);
+		ROS_ASSERT(m_nav_period > 0);
+		ROS_ASSERT_MSG(
+			!cfg_file_reactive.empty(),
+			"Mandatory param 'cfg_file_reactive' is missing!");
+		ROS_ASSERT_MSG(
+			mrpt::system::fileExists(cfg_file_reactive),
+			"Config file not found: '%s'", cfg_file_reactive.c_str());
+
+		m_reactive_nav_engine->enableLogFile(m_save_nav_log);
+
+		// Load reactive config:
+		// ----------------------------------------------------
+		try
+		{
+			CConfigFile cfgFil(cfg_file_reactive);
+			m_reactive_nav_engine->loadConfigFile(cfgFil);
+		}
+		catch (std::exception& e)
+		{
+			ROS_ERROR(
+				"Exception initializing reactive navigation engine:\n%s",
+				e.what());
+			throw;
+		}
+
+		// load robot shape: (1) default, (2) via params, (3) via topic
+		// ----------------------------------------------------------------
+		// m_reactive_nav_engine->changeRobotShape();
+
+		// Init this subscriber first so we know asap the desired robot shape,
+		// if provided via a topic:
+		if (!m_sub_topic_robot_shape.empty() && nav_type == "2D")
+		{
+			m_sub_robot_shape = m_nh.subscribe<geometry_msgs::Polygon>(
+				m_sub_topic_robot_shape, 1,
+				&ReactiveNavNode::onRosSetRobotShape, this);
+			ROS_INFO(
+				"Params say robot shape will arrive via topic '%s'... waiting "
+				"3 seconds for it.",
+				m_sub_topic_robot_shape.c_str());
+			ros::Duration(3.0).sleep();
+			for (size_t i = 0; i < 100; i++) ros::spinOnce();
+			ROS_INFO("Wait done.");
+		} else if (!m_sub_topic_robot_shape.empty())
+		{
+			/*mrpt::nav::TRobotShape rob;
+			if (shape::getTRobotShape(rob,m_localn))
+				onRosSetRobotShape3D(rob);
+			else
+				ROS_INFO("Could not read 3D shape");*/
+		}
+
+		// Init ROS publishers:
+		// -----------------------
+		m_pub_cmd_vel = m_nh.advertise<geometry_msgs::Twist>(m_pub_topic_cmd_vel, 1);
+		m_pub_end_nav = m_nh.advertise<std_msgs::Bool>(m_pub_topic_end_nav_event, 1);
+
+		// Init ROS subs:
+		// -----------------------
+		// "/reactive_nav_goal", "/move_base_simple/goal" (
+		// geometry_msgs/PoseStamped )
+		m_sub_nav_goal = m_nh.subscribe<geometry_msgs::PoseStamped>(
+			m_pub_topic_reactive_nav_goal, 1,
+			&ReactiveNavNode::onRosGoalReceived, this);
+		/*m_sub_local_obs = m_nh.subscribe<sensor_msgs::PointCloud2>(
+			m_sub_topic_local_obstacles, 1,
+			&ReactiveNavNode::onRosLocalObstacles, this);*/
+
+		// Init timers:
+		// ----------------------------------------------------
+		m_timer_run_nav = m_nh.createTimer(
+			ros::Duration(m_nav_period), &ReactiveNavNode::onDoNavigation,
+			this);
+
+};
+
 
 	/**
 	 * @brief Issue a navigation command
@@ -599,5 +736,5 @@ class ReactiveNavNode
 	}
 
 };  // end class
-
+}
 #endif

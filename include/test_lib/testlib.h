@@ -9,7 +9,7 @@
 #include <tf/transform_listener.h>
 #include <nav_core/base_local_planner.h>
 #include <test_lib/mrpt_reactivenav_node.h>
-
+#include <nodelet/loader.h>
 namespace testlib // this namespace will be changed.
 {
 	/**
@@ -28,7 +28,8 @@ namespace testlib // this namespace will be changed.
 	class MyNavigator : public nav_core::BaseLocalPlanner 
 	{
 		private:
-			ReactiveNavNode *m_reactive;
+			nodelet::Loader nodelet;
+			local::ReactiveNavNode *m_reactive;
 			ros::NodeHandle m_nh;
 			ros::NodeHandle m_localnh{"~"}; // this way it initializes non const static attributes.
 			ros::Publisher m_goal_pub;
