@@ -82,7 +82,7 @@ using namespace mrpt::utils;
 #include <pcl/common/common.h>
 #include <pcl/common/centroid.h>
 #include <pcl_conversions/pcl_conversions.h>
-
+#include <laser_geometry/laser_geometry.h>
 // The ROS node
 class LocalObstaclesNode
 {
@@ -111,6 +111,10 @@ class LocalObstaclesNode
 	//! than m_publish_period
 	double m_publish_period;  //!< In secs (default: 0.05). This can't be larger
 	//! than m_time_window
+
+	/** The local maps */
+	boost::mutex m_localmap_mtx;
+	CSimplePointsMap m_localmap_pts;
 
 	ros::Timer m_timer_publish;
 
@@ -158,9 +162,36 @@ class LocalObstaclesNode
 			subs[i] = m_nh.subscribe(lstSources[i], 1, cb, this);
 		return lstSources.size();
 	}
+		void downscaleCloud(const sensor_msgs::PointCloud2ConstPtr scan,
+	 const sensor_msgs::PointCloud2Ptr scan_voxel) const
+	{
+		pcl::PCLPointCloud2* cloud = new pcl::PCLPointCloud2;
+		pcl::PCLPointCloud2ConstPtr cloud_ptr(cloud);
+		pcl::PCLPointCloud2* cloud_filt = new pcl::PCLPointCloud2;
+		pcl::PCLPointCloud2ConstPtr cloud_ptr_filt(cloud_filt);
+		pcl_conversions::toPCL(*scan, *cloud);
+		pcl::VoxelGrid<pcl::PCLPointCloud2> sor;
+		sor.setInputCloud(cloud_ptr);
+		sor.setLeafSize(0.3, 0.3, 0.3);
+		sor.filter(*cloud_filt);
+		pcl_conversions::fromPCL(*cloud_ptr_filt, *scan_voxel);
+
+	}
+
+	void downscaleLaser(const sensor_msgs::LaserScanConstPtr scan,
+	 const sensor_msgs::PointCloud2Ptr scan_voxel) const
+	{	
+		laser_geometry::LaserProjection proj;
+		sensor_msgs::PointCloud2Ptr cloud(new sensor_msgs::PointCloud2);
+		proj.projectLaser(*scan,*cloud);
+		//NODELET_INFO("Header laser cloud: %s", cloud->header.frame_id.c_str());
+		downscaleCloud(cloud, scan_voxel);
+	}
+
+
 	/** Callback: On new sensor data (depth camera)
 	 */
-	void onNewSensor_DepthCam(const sensor_msgs::PointCloud2Ptr& scan)
+	void onNewSensor_DepthCam(const sensor_msgs::PointCloud2ConstPtr& scan)
 	{
 		CTimeLoggerEntry tle(m_profiler, "onNewSensor_DepthCam");
 		// Get the relative position of the sensor wrt the robot:
@@ -169,7 +200,7 @@ class LocalObstaclesNode
 		{
 			CTimeLoggerEntry tle2(
 				m_profiler, "onNewSensor_DepthCam.lookupTransform_sensor");
-			// ROS_INFO("[onNewSensor_DepthCam] %s, %s
+			// NODELET_INFO("[onNewSensor_DepthCam] %s, %s
 			// ",scan->header.frame_id.c_str(), m_frameid_robot.c_str());
 
 			m_tf_listener.lookupTransform(
@@ -192,27 +223,8 @@ class LocalObstaclesNode
 #else
 			CSimplePointsMap::Create();
 #endif
-		// Convert to PCL data type
-		/*pcl::PointCloud
-		pcl_conversions::toPCL(*scan, *cloud);
-		// Perform voxel grid downsampling filtering
-		pcl::VoxelGrid<pcl::PCLPointCloud2> sor;
-		sor.setInputCloud(cloudPtr);
-		sor.setLeafSize(0.01, 0.01, 0.01);
-		sor.filter(*cloudFilteredPtr);*/
 		sensor_msgs::PointCloud2Ptr scan_voxel(new sensor_msgs::PointCloud2);
-		{
-			pcl::PCLPointCloud2* cloud = new pcl::PCLPointCloud2;
-			pcl::PCLPointCloud2* cloud_filt = new pcl::PCLPointCloud2;
-			pcl::PCLPointCloud2Ptr cloud_ptr(cloud);
-			pcl::PCLPointCloud2Ptr cloud_filt_ptr(cloud_filt);
-			pcl_conversions::toPCL(*scan, *cloud);
-			pcl::VoxelGrid<pcl::PCLPointCloud2> sor;
-			sor.setInputCloud(cloud_ptr);
-			sor.setLeafSize(0.3, 0.3, 0.3);
-			sor.filter(*cloud_filt_ptr);
-			pcl_conversions::fromPCL(*cloud_filt_ptr, *scan_voxel);
-		}
+		downscaleCloud(scan, scan_voxel);
 		mrpt_bridge::copy(*scan_voxel, *obsPointMap);
 
 		ROS_DEBUG(
@@ -293,13 +305,26 @@ class LocalObstaclesNode
 		mrpt_bridge::convert(sensorOnRobot, sensorOnRobot_mrpt);
 		// In MRPT, CObservation2DRangeScan holds both: sensor data + relative
 		// pose:
-		auto obsScan = CObservation2DRangeScan::Create();
-		mrpt_bridge::convert(*scan, sensorOnRobot_mrpt, *obsScan);
 
-		ROS_DEBUG(
+		CSimplePointsMap::Ptr obsPointMap =
+#if MRPT_VERSION >= 0x199
+			mrpt::make_aligned_shared<CSimplePointsMap>();
+#else
+			CSimplePointsMap::Create();
+#endif
+		sensor_msgs::PointCloud2Ptr scan_voxel(new sensor_msgs::PointCloud2);
+		
+		downscaleLaser(scan, scan_voxel);
+		mrpt_bridge::copy(*scan_voxel, *obsPointMap);
+
+	//	auto obsScan = CObservation2DRangeScan::Create();
+	//	sensor_msgs::LaserScan scan_trimmed;
+	//	mrpt_bridge::convert(scan_trimmed, sensorOnRobot_mrpt, *obsScan);
+
+		/*ROS_DEBUG(
 			"[onNewSensor_Laser2D] %u rays, sensor pose on robot %s",
 			static_cast<unsigned int>(obsScan->scan.size()),
-			sensorOnRobot_mrpt.asString().c_str());
+			sensorOnRobot_mrpt.asString().c_str());*/
 
 		// Get sensor timestamp:
 		const double timestamp = scan->header.stamp.toSec();
@@ -326,7 +351,7 @@ class LocalObstaclesNode
 				m_tf_listener.lookupTransform(
 					m_frameid_reference, m_frameid_robot, ros::Time(0), tx);
 			}
-			mrpt_bridge::convert(tx, robotPose);
+			mrpt_bridge::convert(tx*sensorOnRobot, robotPose);
 			ROS_DEBUG(
 				"[onNewSensor_Laser2D] robot pose %s",
 				robotPose.asString().c_str());
@@ -339,7 +364,7 @@ class LocalObstaclesNode
 
 		// Insert into the observation history:
 		TInfoPerTimeStep ipt;
-		ipt.observation = obsScan;
+		ipt.point_map = obsPointMap;
 		ipt.robot_pose = robotPose;
 
 		m_hist_obs_mtx.lock();
@@ -388,7 +413,8 @@ class LocalObstaclesNode
 
 		// Build local map(s):
 		// -----------------------------------------------
-		m_localmap_pts.clear();
+		clearObstacles();
+		//m_localmap_pts.clear();
 		mrpt::poses::CPose3D curRobotPose;
 		{
 			CTimeLoggerEntry tle2(m_profiler, "onDoPublish.buildLocalMap");
@@ -437,8 +463,7 @@ class LocalObstaclesNode
 				{
 
 			//ROS_INFO("[MRPTOBSTACLES] INSERTING MAP");
-					m_localmap_pts.insertAnotherMap(
-						ipt.point_map.get(), relPose);
+					insertObstacles(*ipt.point_map.get(), relPose);
 				}
 				else
 				{
@@ -451,18 +476,18 @@ class LocalObstaclesNode
 		}
 
 		// Publish them:
-		/*if (m_pub_local_map_pointcloud.getNumSubscribers() > 0)
+		if (m_pub_local_map_pointcloud.getNumSubscribers() > 0)
 		{
-			sensor_msgs::PointCloudPtr msg_pts =
-				sensor_msgs::PointCloudPtr(new sensor_msgs::PointCloud);
+			sensor_msgs::PointCloud2Ptr msg_pts =
+				sensor_msgs::PointCloud2Ptr(new sensor_msgs::PointCloud2);
 			msg_pts->header.frame_id = m_frameid_robot;
 			msg_pts->header.stamp = ros::Time(obs.rbegin()->first);
-			mrpt_bridge::point_cloud::mrpt2ros(
-				m_localmap_pts, msg_pts->header, *msg_pts);
+			mrpt_bridge::copy(
+				*getObstacles(), msg_pts->header, *msg_pts);
 			m_pub_local_map_pointcloud.publish(msg_pts);
 
 			//ROS_INFO("[MRPTOBSTACLES] PUBLISHING CLOUD");
-		}*/
+		}
 
 		// Show gui:
 		if (m_show_gui)
@@ -512,7 +537,7 @@ class LocalObstaclesNode
 				gl_obs->insert(gl_axis);
 			}  // end for
 
-			gl_pts->loadFromPointsMap(&m_localmap_pts);
+			gl_pts->loadFromPointsMap(&*getObstacles());
 
 			m_gui_win->unlockAccess3DScene();
 			m_gui_win->repaint();
@@ -521,9 +546,25 @@ class LocalObstaclesNode
 	}  // onDoPublish
 
    public:
+	std::shared_ptr<CSimplePointsMap> getObstacles() {
+		m_localmap_mtx.lock();
+		std::unique_ptr<CSimplePointsMap> res(new CSimplePointsMap);
+		*res += m_localmap_pts;
+		m_localmap_mtx.unlock();
+		return res;
+	}
+	void insertObstacles(const CSimplePointsMap& other, const mrpt::poses::CPose3D& relPose) {
+		m_localmap_mtx.lock();
+		m_localmap_pts.insertAnotherMap(
+						&other, relPose);
+		m_localmap_mtx.unlock();
+	}
+	void clearObstacles(){
+		m_localmap_mtx.lock();
+		m_localmap_pts.clear();
+		m_localmap_mtx.unlock();
+	}
 
-	/** The local maps */
-	CSimplePointsMap m_localmap_pts;
 	/**  Constructor: Inits ROS system */
 	LocalObstaclesNode(int argc, char** argv, ros::NodeHandle m_nh_up, //!< The node handle
 	ros::NodeHandle m_localn_up)
@@ -562,7 +603,7 @@ ROS_INFO("LOCALOBSTACLES CREATING");
 		ROS_ASSERT(m_publish_period > 0);
 
 		// Init ROS publishers:
-		m_pub_local_map_pointcloud = m_nh.advertise<sensor_msgs::PointCloud>(
+		m_pub_local_map_pointcloud = m_nh.advertise<sensor_msgs::PointCloud2>(
 			m_topic_local_map_pointcloud, 10);
 
 		// Init ROS subs:

@@ -259,9 +259,13 @@ class ReactiveNavNode
 			mrpt::system::TTimeStamp& timestamp) override
 		{
 			timestamp = mrpt::system::now();
+			ROS_INFO("Interface. Entering MUTEX");
 			std::lock_guard<std::mutex> csl(m_parent.m_last_obstacles_cs);
-			obstacles = m_parent.obstacles.m_localmap_pts;
 
+			ROS_INFO("Interface. GONNA WRITE OBSTACLES");
+			obstacles = *m_parent.obstacles.getObstacles();
+			
+			ROS_INFO("Interface. EXITING MUTEX");
 			MRPT_TODO("TODO: Check age of obstacles!");
 			return true;
 		}
