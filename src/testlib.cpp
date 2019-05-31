@@ -46,10 +46,12 @@ namespace testlib
 		}
 
 		cmd_vel = m_cmd_vel;
-		bool not_clear_costmap = isInGoalPosition() || cmd_vel.linear.x >= MIN_VEL_VALUE 
-			|| cmd_vel.angular.z >= MIN_VEL_VALUE;
-		if (!not_clear_costmap)
+		bool not_clear_costmap = isInGoalPosition() || abs(cmd_vel.linear.x) >= MIN_VEL_VALUE 
+			|| abs(cmd_vel.angular.z) >= MIN_VEL_VALUE;
+		if (!not_clear_costmap) {
 			m_is_reactive_mrpt_finished = false;
+			ROS_INFO("cmd_vel.linear: %f, cmd_vel.aungular: %f,", cmd_vel.linear.x , cmd_vel.angular.z);
+			}
 		return not_clear_costmap;
 	};
 
