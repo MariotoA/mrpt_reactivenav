@@ -6,7 +6,7 @@
     ### ROBOT SIMULATION ###
     <param name="use_sim_time" value="true" />
     <include file="$(find mrpt_reactivenav)/launch/simbot_stage.launch" >
-        <arg name="world_file" value="-d $(find mrpt_reactivenav)/maps/MAPIRlab_furniture_3D2cam_giraff.world" />
+        <arg name="world_file" value="-d $(find mrpt_reactivenav)/maps/MAPIRlab_furniture_3D2cam_giraff_obstacles3D.world" />
         <arg name="disable_odometry" value="false" />
     </include>      
     
@@ -47,11 +47,7 @@
 
 	<!-- <param name="source_topics_depthcam" value="points_0, points_1"/> -->
     <node pkg="keyboard_control" type="keyboard_control" name="keyboard_control" />
-	<include file="$(find mrpt_reactivenav)/launch/simbot_move_base.launch">
-		<arg name="nav_type" value="3D"/>
-		<arg name="config_reactive_file" value="$(find mrpt_reactivenav)/tutorial/reactive3d_custom_config_giraff.ini"/>
-		<arg name="shape3D_file" value="$(find shape_publisher)/shape_file/giraff3D.yaml" />
-	</include>
+	
     ### RVIZ ###
     <node name="rviz_player" pkg="rviz" type="rviz" args="-d $(find mrpt_reactivenav)/cfg/rvizco.rviz"/>
 	

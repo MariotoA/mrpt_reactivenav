@@ -83,6 +83,8 @@ using namespace mrpt::utils;
 #include <pcl/common/centroid.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <laser_geometry/laser_geometry.h>
+#include <pcl_ros/transforms.h>
+#include <pcl_ros/point_cloud.h>
 // The ROS node
 class LocalObstaclesNode
 {
@@ -111,7 +113,9 @@ class LocalObstaclesNode
 	//! than m_publish_period
 	double m_publish_period;  //!< In secs (default: 0.05). This can't be larger
 	//! than m_time_window
+	double m_leaf_x=0.3,m_leaf_y=0.3,m_leaf_z=0.3;
 
+	
 	/** The local maps */
 	boost::mutex m_localmap_mtx;
 	CSimplePointsMap m_localmap_pts;
@@ -172,7 +176,11 @@ class LocalObstaclesNode
 		pcl_conversions::toPCL(*scan, *cloud);
 		pcl::VoxelGrid<pcl::PCLPointCloud2> sor;
 		sor.setInputCloud(cloud_ptr);
-		sor.setLeafSize(0.3, 0.3, 0.3);
+		double x,y,z;
+		m_localn.param("downscaling_leaf_size_x", x,m_leaf_x);
+		m_localn.param("downscaling_leaf_size_y", y,m_leaf_y);
+		m_localn.param("downscaling_leaf_size_z", z,m_leaf_z);
+		sor.setLeafSize(x, y, z);
 		sor.filter(*cloud_filt);
 		pcl_conversions::fromPCL(*cloud_ptr_filt, *scan_voxel);
 
@@ -202,7 +210,7 @@ class LocalObstaclesNode
 				m_profiler, "onNewSensor_DepthCam.lookupTransform_sensor");
 			// NODELET_INFO("[onNewSensor_DepthCam] %s, %s
 			// ",scan->header.frame_id.c_str(), m_frameid_robot.c_str());
-
+			// camera -> base_link
 			m_tf_listener.lookupTransform(
 				m_frameid_robot, scan->header.frame_id, ros::Time(0),
 				sensorOnRobot);
@@ -223,9 +231,7 @@ class LocalObstaclesNode
 #else
 			CSimplePointsMap::Create();
 #endif
-		sensor_msgs::PointCloud2Ptr scan_voxel(new sensor_msgs::PointCloud2);
-		downscaleCloud(scan, scan_voxel);
-		mrpt_bridge::copy(*scan_voxel, *obsPointMap);
+
 
 		ROS_DEBUG(
 			"[onNewSensor_DepthCam] %u points",
@@ -241,9 +247,10 @@ class LocalObstaclesNode
 			CTimeLoggerEntry tle3(
 				m_profiler, "onNewSensor_DepthCam.lookupTransform_robot");
 			tf::StampedTransform tx;
-
+					
 			try
-			{
+			{	
+				// typ: /base_link -> /odom
 				m_tf_listener.lookupTransform(
 					m_frameid_reference, m_frameid_robot, scan->header.stamp,
 					tx);
@@ -255,6 +262,10 @@ class LocalObstaclesNode
 				m_tf_listener.lookupTransform(
 					m_frameid_reference, m_frameid_robot, ros::Time(0), tx);
 			}
+			sensor_msgs::PointCloud2Ptr scan_voxel(new sensor_msgs::PointCloud2);
+			//pcl_ros::transformPointCloud( "odom", tx*sensorOnRobot,*scan, *scan_voxel);
+			downscaleCloud(scan, scan_voxel);
+			mrpt_bridge::copy(*scan_voxel, *obsPointMap);
 			mrpt_bridge::convert(tx * sensorOnRobot, robotPose);
 			ROS_DEBUG(
 				"[onNewSensor_DepthCam] robot pose %s",
@@ -582,6 +593,10 @@ ROS_INFO("LOCALOBSTACLES CREATING");
 		  m_nh = m_nh_up;
 
 		  m_localn = m_localn_up;
+
+		m_localn.param("downscaling_leaf_size_x", m_leaf_x,m_leaf_x);
+		m_localn.param("downscaling_leaf_size_y", m_leaf_y,m_leaf_y);
+		m_localn.param("downscaling_leaf_size_z", m_leaf_z,m_leaf_z);
 		// Load params:
 		m_localn.param("show_gui", m_show_gui, m_show_gui);
 		m_localn.param(
@@ -633,6 +648,5 @@ ROS_INFO("LOCALOBSTACLES CREATING");
 			this);
 
 	}  // end ctor
-
 };  // end class
 

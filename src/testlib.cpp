@@ -195,16 +195,33 @@ namespace testlib
 		geometry_msgs::Twist cmd_vel;
 		tf::Quaternion q = m_current_pose.getRotation(); 
 		double yaw_curr = tf::getYaw(q), yaw_goal = tf::getYaw(m_waypoint.pose.orientation);
-		double dist= fmin(yaw_curr - yaw_goal, M_PI + yaw_goal - yaw_curr);
-		if (dist > m_target_allowed_radians) 
-		{
-			cmd_vel.angular.z = -m_alignment_command;
-		} else if (dist < -m_target_allowed_radians) 
+		bool is_curr_less = yaw_curr <= yaw_goal;
+		double diff;
+		if (is_curr_less) {
+			diff = yaw_goal - yaw_curr;
+			is_curr_less = diff <= -diff+2*M_PI;
+		} else {
+			diff = -yaw_goal + yaw_curr;
+			is_curr_less = diff > -diff+2*M_PI;
+		}
+		diff = fmin(diff, -diff+2*M_PI);
+		bool is_turning = abs(diff) > m_target_allowed_radians;
+		ROS_INFO("[MyNavigator::endAlignment] Yaw_current: %f, Yaw_goal: %f",
+		yaw_curr, yaw_goal);
+		if (is_turning && is_curr_less) 
 		{
 			cmd_vel.angular.z = m_alignment_command;
+
+			ROS_INFO("[MyNavigator::endAlignment] Left turn");
+		
+		} else if (is_turning)
+		{
+			cmd_vel.angular.z = -m_alignment_command;
+			ROS_INFO("[MyNavigator::endAlignment] Right turn");
 		}
 		m_cmd_vel = cmd_vel;
 	}
+
 	bool MyNavigator::isNewGoalReceived() {
 		auto last_pose_plan = m_g_plan[m_g_plan.size() - 1];
 		double x=last_pose_plan.pose.position.x - m_waypoint.pose.position.x;

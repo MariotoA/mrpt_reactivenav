@@ -358,6 +358,10 @@ class ReactiveNavNode
         	ROS_INFO("Incorrect navigation type. It should be 2D or 3D");
         	return;
         }
+		double xl=0.3, yl=0.3,zl=0.3;
+		m_localn.param("downscaling_leaf_size_x", xl,xl);
+		m_localn.param("downscaling_leaf_size_y", yl,yl);
+		m_localn.param("downscaling_leaf_size_z", zl,zl);
 		m_localn.param(
 			"cfg_file_reactive", cfg_file_reactive, cfg_file_reactive);
 		m_localn.param(

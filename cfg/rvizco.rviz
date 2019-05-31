@@ -5,7 +5,6 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /LaserScan1
-        - /local_obstacles1
         - /TF1/Frames1
         - /TF1/Tree1
         - /Waypoint1
@@ -19,7 +18,7 @@ Panels:
         - /DepthCloud1
         - /DepthCloud1/Auto Size1
         - /Image1
-        - /PointCloud21
+        - /local_obstacles1
       Splitter Ratio: 0.5
     Tree Height: 476
   - Class: rviz/Selection
@@ -40,7 +39,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: local_obstacles
 Visualization Manager:
   Class: ""
   Displays:
@@ -150,7 +149,7 @@ Visualization Manager:
       Color: 255; 170; 0
       Color Transformer: FlatColor
       Decay Time: 0
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 1
@@ -167,36 +166,6 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: false
-      Value: true
-    - Alpha: 1
-      Autocompute Intensity Bounds: true
-      Autocompute Value Bounds:
-        Max Value: 10
-        Min Value: -10
-        Value: true
-      Axis: Z
-      Channel Name: intensity
-      Class: rviz/PointCloud
-      Color: 255; 0; 255
-      Color Transformer: FlatColor
-      Decay Time: 0
-      Enabled: false
-      Invert Rainbow: false
-      Max Color: 255; 255; 255
-      Max Intensity: 4096
-      Min Color: 0; 0; 0
-      Min Intensity: 0
-      Name: local_obstacles
-      Position Transformer: XYZ
-      Queue Size: 10
-      Selectable: true
-      Size (Pixels): 3
-      Size (m): 0.0500000007
-      Style: Flat Squares
-      Topic: /local_map_pointcloud
-      Unreliable: false
-      Use Fixed Frame: true
-      Use rainbow: true
       Value: false
     - Alpha: 1
       Buffer Length: 1
@@ -453,6 +422,10 @@ Visualization Manager:
           Value: false
         body:
           Value: false
+        camera_0:
+          Value: true
+        camera_1:
+          Value: true
         green_button:
           Value: false
         head:
@@ -494,6 +467,10 @@ Visualization Manager:
                         {}
                   red_button:
                     {}
+                camera_0:
+                  {}
+                camera_1:
+                  {}
                 hokuyo_front:
                   {}
                 laser_stage:
@@ -551,8 +528,7 @@ Visualization Manager:
         Camera: true
         DepthCloud: true
         Global Map:
-          Costmap: true
-          Planner: true
+          "": true
           Value: true
         GlobalPlan: true
         Goal: true
@@ -561,7 +537,6 @@ Visualization Manager:
         LaserScan: true
         Map: true
         Odometry: true
-        PointCloud2: true
         RobotModel: true
         Robot_footprint: true
         Robot_shape_mrpt: true
@@ -597,7 +572,6 @@ Visualization Manager:
         LaserScan: true
         Map: true
         Odometry: true
-        PointCloud2: true
         RobotModel: true
         Robot_footprint: true
         Robot_shape_mrpt: true
@@ -657,24 +631,24 @@ Visualization Manager:
       Unreliable: false
       Value: false
     - Alpha: 1
-      Autocompute Intensity Bounds: true
+      Autocompute Intensity Bounds: false
       Autocompute Value Bounds:
-        Max Value: 10
-        Min Value: -10
+        Max Value: 2.30482268
+        Min Value: -0.0695676953
         Value: true
       Axis: Z
-      Channel Name: intensity
+      Channel Name: z
       Class: rviz/PointCloud2
       Color: 255; 0; 127
-      Color Transformer: FlatColor
+      Color Transformer: Intensity
       Decay Time: 0
-      Enabled: false
-      Invert Rainbow: false
+      Enabled: true
+      Invert Rainbow: true
       Max Color: 255; 255; 255
-      Max Intensity: 4096
-      Min Color: 0; 0; 0
-      Min Intensity: 0
-      Name: PointCloud2
+      Max Intensity: 1.33286023
+      Min Color: 255; 0; 255
+      Min Intensity: -0.0695681125
+      Name: local_obstacles
       Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
@@ -684,8 +658,8 @@ Visualization Manager:
       Topic: /local_map_pointcloud
       Unreliable: false
       Use Fixed Frame: true
-      Use rainbow: true
-      Value: false
+      Use rainbow: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 190; 184; 177
@@ -717,18 +691,18 @@ Visualization Manager:
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -2.74377012
-        Y: 3.53965712
+        X: -3.08104658
+        Y: 1.80575228
         Z: -4.847542e-05
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.565203667
+      Pitch: 0.539796889
       Target Frame: <Fixed Frame>
       Value: XYOrbit (rviz)
-      Yaw: 2.85355949
+      Yaw: 1.938568
     Saved: ~
 Window Geometry:
   Camera:
@@ -750,5 +724,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1366
-  X: 1678
-  Y: 189
+  X: 1476
+  Y: 170
