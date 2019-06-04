@@ -79,6 +79,8 @@ using namespace mrpt::utils;
 #include <pcl/point_types.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/extract_indices.h>
+#include <pcl/filters/passthrough.h>
+
 #include <pcl/common/common.h>
 #include <pcl/common/centroid.h>
 #include <pcl_conversions/pcl_conversions.h>
@@ -174,6 +176,20 @@ class LocalObstaclesNode
 		pcl::PCLPointCloud2* cloud_filt = new pcl::PCLPointCloud2;
 		pcl::PCLPointCloud2ConstPtr cloud_ptr_filt(cloud_filt);
 		pcl_conversions::toPCL(*scan, *cloud);
+
+		pcl::PassThrough<pcl::PCLPointCloud2> pass;
+  		pass.setInputCloud (cloud_ptr);
+  		pass.setFilterFieldName ("z");
+  		pass.setFilterLimits (0.15, 1.85);
+		pass.filter (*cloud);
+  		pass.setInputCloud (cloud_ptr);
+  		pass.setFilterFieldName ("x");
+  		pass.setFilterLimits (-1.5, 1.5);
+		pass.filter (*cloud);
+  		pass.setFilterFieldName ("y");
+  		pass.setFilterLimits (-1.5, 1.5);
+		pass.filter (*cloud);
+		
 		pcl::VoxelGrid<pcl::PCLPointCloud2> sor;
 		sor.setInputCloud(cloud_ptr);
 		double x,y,z;
@@ -255,18 +271,21 @@ class LocalObstaclesNode
 					m_frameid_reference, m_frameid_robot, scan->header.stamp,
 					tx);
 			}
-			catch (tf::ExtrapolationException&)
+			catch (tf::ExtrapolationException& ex)
 			{
 				// if we need a "too much " recent robot pose,be happy with the
 				// latest one:
-				m_tf_listener.lookupTransform(
-					m_frameid_reference, m_frameid_robot, ros::Time(0), tx);
+				m_tf_listener.lookupTransform(m_frameid_reference, m_frameid_robot, ros::Time(0), tx);
 			}
+
 			sensor_msgs::PointCloud2Ptr scan_voxel(new sensor_msgs::PointCloud2);
-			//pcl_ros::transformPointCloud( "odom", tx*sensorOnRobot,*scan, *scan_voxel);
-			downscaleCloud(scan, scan_voxel);
+			pcl_ros::transformPointCloud( m_frameid_robot,
+			 sensorOnRobot,*scan, *scan_voxel);
+			downscaleCloud(scan_voxel, scan_voxel);
+			pcl_ros::transformPointCloud( m_frameid_reference,
+			 tx,*scan_voxel, *scan_voxel);
 			mrpt_bridge::copy(*scan_voxel, *obsPointMap);
-			mrpt_bridge::convert(tx * sensorOnRobot, robotPose);
+			//mrpt_bridge::convert(sensorOnRobot * tx, robotPose);
 			ROS_DEBUG(
 				"[onNewSensor_DepthCam] robot pose %s",
 				robotPose.asString().c_str());
@@ -294,95 +313,11 @@ class LocalObstaclesNode
 	void onNewSensor_Laser2D(const sensor_msgs::LaserScanConstPtr& scan)
 	{
 		CTimeLoggerEntry tle(m_profiler, "onNewSensor_Laser2D");
-
-		// Get the relative position of the sensor wrt the robot:
-		tf::StampedTransform sensorOnRobot;
-		try
-		{
-			CTimeLoggerEntry tle2(
-				m_profiler, "onNewSensor_Laser2D.lookupTransform_sensor");
-			m_tf_listener.lookupTransform(
-				m_frameid_robot, scan->header.frame_id, ros::Time(0),
-				sensorOnRobot);
-		}
-		catch (tf::TransformException& ex)
-		{
-			ROS_ERROR("%s", ex.what());
-			return;
-		}
-
-		// Convert data to MRPT format:
-		mrpt::poses::CPose3D sensorOnRobot_mrpt;
-		mrpt_bridge::convert(sensorOnRobot, sensorOnRobot_mrpt);
-		// In MRPT, CObservation2DRangeScan holds both: sensor data + relative
-		// pose:
-
-		CSimplePointsMap::Ptr obsPointMap =
-#if MRPT_VERSION >= 0x199
-			mrpt::make_aligned_shared<CSimplePointsMap>();
-#else
-			CSimplePointsMap::Create();
-#endif
-		sensor_msgs::PointCloud2Ptr scan_voxel(new sensor_msgs::PointCloud2);
+		laser_geometry::LaserProjection proj;
+		sensor_msgs::PointCloud2Ptr cloud(new sensor_msgs::PointCloud2);
+		proj.projectLaser(*scan,*cloud);
+		onNewSensor_DepthCam(cloud);
 		
-		downscaleLaser(scan, scan_voxel);
-		mrpt_bridge::copy(*scan_voxel, *obsPointMap);
-
-	//	auto obsScan = CObservation2DRangeScan::Create();
-	//	sensor_msgs::LaserScan scan_trimmed;
-	//	mrpt_bridge::convert(scan_trimmed, sensorOnRobot_mrpt, *obsScan);
-
-		/*ROS_DEBUG(
-			"[onNewSensor_Laser2D] %u rays, sensor pose on robot %s",
-			static_cast<unsigned int>(obsScan->scan.size()),
-			sensorOnRobot_mrpt.asString().c_str());*/
-
-		// Get sensor timestamp:
-		const double timestamp = scan->header.stamp.toSec();
-
-		// Get robot pose at that time in the reference frame, typ: /odom ->
-		// /base_link
-		mrpt::poses::CPose3D robotPose;
-		try
-		{
-			CTimeLoggerEntry tle3(
-				m_profiler, "onNewSensor_Laser2D.lookupTransform_robot");
-			tf::StampedTransform tx;
-
-			try
-			{
-				m_tf_listener.lookupTransform(
-					m_frameid_reference, m_frameid_robot, scan->header.stamp,
-					tx);
-			}
-			catch (tf::ExtrapolationException&)
-			{
-				// if we need a "too much " recent robot pose,be happy with the
-				// latest one:
-				m_tf_listener.lookupTransform(
-					m_frameid_reference, m_frameid_robot, ros::Time(0), tx);
-			}
-			mrpt_bridge::convert(tx*sensorOnRobot, robotPose);
-			ROS_DEBUG(
-				"[onNewSensor_Laser2D] robot pose %s",
-				robotPose.asString().c_str());
-		}
-		catch (tf::TransformException& ex)
-		{
-			ROS_ERROR("%s", ex.what());
-			return;
-		}
-
-		// Insert into the observation history:
-		TInfoPerTimeStep ipt;
-		ipt.point_map = obsPointMap;
-		ipt.robot_pose = robotPose;
-
-		m_hist_obs_mtx.lock();
-		m_hist_obs.insert(
-			m_hist_obs.end(), TListObservations::value_type(timestamp, ipt));
-		m_hist_obs_mtx.unlock();
-
 	}  // end onNewSensor_Laser2D
 
 	/** Callback: On recalc local map & publish it */
@@ -452,6 +387,7 @@ class LocalObstaclesNode
 
 			// For each observation: compute relative robot pose & insert obs
 			// into map:
+			#pragma omp parallel for
 			for (TListObservations::const_iterator it = obs.begin();
 				 it != obs.end(); ++it)
 			{
@@ -482,7 +418,6 @@ class LocalObstaclesNode
 						"[onDoPublish] Observation is empty, could not be "
 						"added to local map");
 				}
-
 			}  // end for
 		}
 
