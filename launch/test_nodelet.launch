@@ -1,0 +1,91 @@
+<!-- Launch file principal para lanzar una simulación con Stage + MoveBse -->
+
+<launch>    
+  <arg name="launch_prefix" default="" />
+  <arg name="nav_type" default="2D"/>
+  <arg name="config_reactive_file" default="$(find mrpt_reactivenav)/tutorial/reactive2d_custom_config.ini"/>
+  <arg name="shape3D_file" default="" />
+  <arg name="2dscan" default="laser_scan"/>
+  <arg name="depthcam" default="points_0,points_1"/>
+  <arg name="time_window" default="0.2" />
+	<arg name="map_file" default="" />
+    ### ROBOT SIMULATION ###
+    <param name="use_sim_time" value="true" />
+    <include file="$(find mrpt_reactivenav)/launch/simbot_stage.launch" >
+        <arg name="world_file" value="-d $(find mrpt_reactivenav)/maps/MAPIRlab_furniture_3D2cam_giraff_obstacles3D.world" />
+        <arg name="disable_odometry" value="false" />
+    </include>      
+    
+  <node pkg="nodelet" type="nodelet" args="manager" name="record_player_manager" output="screen"/>
+  
+
+  <include file="$(find tfg_reactive_pkg)/launch/proc_depth_image.launch"> 
+			<arg name="topic_cloud" value="/depth_0" />
+			<arg name="topic_camera_info" value="/camera_info_0" />
+			<arg name="topic_out_pc" value="/points_0" />
+			
+			<arg name="name_nodelet" value="0" />
+   </include>
+
+ <include file="$(find tfg_reactive_pkg)/launch/proc_depth_image.launch"> 
+			<arg name="topic_cloud" value="/depth_1" />
+			<arg name="topic_camera_info" value="/camera_info_1" />
+			<arg name="topic_out_pc" value="/points_1" />
+			
+			<arg name="name_nodelet" value="1" />
+    </include>
+    
+    ### URDF model "r2d2" ###
+    <include file="$(find tfg_reactive_pkg)/launch/simbot_urdf.launch" />
+    
+    ### NAVIGATION ###
+    <include file="$(find tfg_reactive_pkg)/launch/simbot_map_server.launch">
+        <arg name="map_file" value="$(find mrpt_reactivenav)/maps/MAPIRlab_furniture_3D.yaml" />
+    </include>
+    <include file="$(find tfg_reactive_pkg)/launch/simbot_fake_loc.launch" />
+  
+	<!--<node pkg="nodelet" type="nodelet" name="mrpt_local_obstacles" args="standalone mrpt_local_obstacles/mrpt_local_obstacles_nodelet">
+    	<param name="source_topics_depthcam" value="points_0,points_1"/>
+		<param name="source_topics_2dscan" value="laser_scan"/>
+		<param name="time_window" value="5" />
+		<param name="show_gui" value="true"/>
+	</node>-->
+	  <node pkg="nodelet" type="nodelet" name="mrpt_reactivenav_nodelet"
+        args="load testlib/mrpt_reactivenav_nodelet record_player_manager --no-bond" output="screen">
+# Set type of reactive navigator (2D or 3D)
+		<param name="nav_type" value="3D"/> 
+		# This sends the distance to the target used by mrpt_reactivenav
+		<param name="target_allowed_distance" value="0.1"/>
+		# Topic to subscribe to get reactive goals (waypoints)
+		<param name="topic_relative_nav_goal" value="reactive_nav_goal"/>
+		# Index value to the selected waypoint from global path
+		<param name="index_waypoint" value="500" />
+		# *Important*: This external config file holds the most important navigation settings
+		<param name="cfg_file_reactive" value="$(find mrpt_reactivenav)/tutorial/reactive3d_custom_config_giraff.ini"/>
+		# Topic to subscribe to get robot shape.
+		<param name="topic_robot_shape" value="/chassis_polygon" />
+		# Rate base_local_planner calls its methods.
+		 <param name="controller_frequency" value="10"/> # This solves the "pitching" problem
+		# Topic where the reactive plugin advertise velocity commands. Default is "cmd_vel".		
+		<param name="topic_cmd_vel" value="reactive_nav_cmd_vel"/>
+		# Leaf size to downscale cloud point from mrpt-local-obstacles		
+		<param name="downscaling_leaf_size_x" value="0.2"/>		
+		<param name="downscaling_leaf_size_y" value="0.2"/>		
+		<param name="downscaling_leaf_size_z" value="0.3"/>
+		# Topic for sensors
+		<param name="source_topics_2dscan" value="$(arg 2dscan)"/>
+		<param name="source_topics_depthcam" value="$(arg depthcam)"/>
+		<param name="time_window" value="$(arg time_window)" />
+		### if nav_type is 3D, parameter server is used.
+		<rosparam file="$(arg shape3D_file)" command="load" if="$(eval nav_type == '3D')" />
+		## Global planner config
+		
+  </node>
+	<!-- <param name="source_topics_depthcam" value="points_0, points_1"/> -->
+    <node pkg="keyboard_control" type="keyboard_control" name="keyboard_control" />
+	
+    ### RVIZ ###
+    <node name="rviz_player" pkg="rviz" type="rviz" args="-d $(find mrpt_reactivenav)/cfg/rvizco.rviz"/>
+	
+
+</launch>

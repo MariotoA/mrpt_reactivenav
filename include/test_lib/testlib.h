@@ -29,6 +29,7 @@ namespace testlib // this namespace will be changed.
 	{
 		private:
 			ReactiveNavNode *m_reactive;
+			bool use_nodelet = true;
 			ros::NodeHandle m_nh;
 			ros::NodeHandle m_localnh{"~"}; // this way it initializes non const static attributes.
 			ros::Publisher m_goal_pub;

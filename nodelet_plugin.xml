@@ -1,0 +1,7 @@
+<library path="lib/libmrpt_reactivenav_nodelet">
+    <class name="testlib/mrpt_reactivenav_nodelet" type="reactive_nav_mrpt::ReactiveNavNodelet" base_class_type="nodelet::Nodelet">
+    <description>
+        MRPT REACTIVE NAV ENGINE WRAPPER AS A NODELET
+    </description>
+  </class>
+</library>

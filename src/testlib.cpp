@@ -111,7 +111,8 @@ namespace testlib
 		char *c = &x;
 		char **a = &c;
 		ROS_INFO("testlib::MyNavigator: INITIALISING FROM METHOD MyNavigator::initialize\n");
-		m_reactive = new ReactiveNavNode(0,a);
+		if (!use_nodelet)
+			m_reactive = new ReactiveNavNode(0,a);
 		// Storing costmap and tf to obtain robot pose later
 		m_costmap_ros = costmap_ros;
 		m_costmap_ros->getRobotPose(m_current_pose);

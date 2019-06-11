@@ -3,7 +3,7 @@ ADD_COMPILE_OPTIONS("-std=c++17")
 project(mrpt_reactivenav CXX)
 
 set(CMAKE_BUILD_TYPE "Debug")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g -fopenmp")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
@@ -26,7 +26,8 @@ find_package(catkin REQUIRED COMPONENTS
   shape_publisher
   pcl_ros
   laser_geometry
-
+  nodelet
+  downscale_cloud
 )
 
 ## System dependencies are found with CMake's conventions
@@ -46,8 +47,8 @@ MESSAGE( STATUS "MRPT_INCLUDE_DIRS: ${MRPT_INCLUDE_DIRS}")
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES test_lib #${PROJECT_NAME}
-  CATKIN_DEPENDS actionlib actionlib_msgs dynamic_reconfigure geometry_msgs mrpt_bridge roscpp tf visualization_msgs pluginlib nav_core
+  LIBRARIES test_lib mrpt_reactivenav_nodelet#${PROJECT_NAME}
+  CATKIN_DEPENDS actionlib actionlib_msgs dynamic_reconfigure geometry_msgs mrpt_bridge roscpp tf visualization_msgs pluginlib nav_core nodelet
   #DEPENDS mrpt
 )
 
@@ -67,6 +68,12 @@ include_directories(
 add_library(test_lib src/testlib.cpp)
 add_dependencies(test_lib ${catkin_EXPORTED_TARGETS} ${MPRT_EXPORTED_TARGETS})
 target_link_libraries(test_lib ${INCLUDE} ${MRPT_LIBRARIES} ${catkin_LIBRARIES})
+
+add_library(mrpt_reactivenav_nodelet src/mrpt_reactivenav_nodelet.cpp)
+add_dependencies(mrpt_reactivenav_nodelet ${catkin_EXPORTED_TARGETS} ${MPRT_EXPORTED_TARGETS})
+target_link_libraries(mrpt_reactivenav_nodelet ${INCLUDE} ${MRPT_LIBRARIES} ${catkin_LIBRARIES})
+
+
 
 
 add_executable(mrpt_reactivenav_node src/mrpt_reactivenav_node.cpp)
