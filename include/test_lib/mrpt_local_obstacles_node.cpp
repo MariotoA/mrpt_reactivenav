@@ -33,6 +33,7 @@
 #include <ros/ros.h>
 
 #include <geometry_msgs/PointStamped.h>
+#include <geometry_msgs/Vector3Stamped.h>
 #include <sensor_msgs/LaserScan.h>
 #include <sensor_msgs/PointCloud.h>
 #include <sensor_msgs/PointCloud2.h>
@@ -77,10 +78,12 @@ using namespace mrpt::utils;
 
 #include <pcl/point_types.h>
 #include <pcl/conversions.h>
-#include <pcl/point_types.h>
 #include <pcl/filters/voxel_grid.h>
+#include <pcl/filters/statistical_outlier_removal.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/filters/passthrough.h>
+#include <pcl/pcl_base.h>
+
 
 #include <pcl/common/common.h>
 #include <pcl/common/centroid.h>
@@ -160,7 +163,7 @@ class LocalObstaclesNode
 		m_subs_depthcam;  //!< Subscriber to depth camera data
 	tf::TransformListener m_tf_listener;  //!< Use to retrieve TF data
 	/**  @} */
-
+	int cont_nue = 0;
 	/**
 	 * @brief Subscribe to a variable number of topics.
 	 * @param lstTopics String with list of topics separated with ","
@@ -180,9 +183,86 @@ class LocalObstaclesNode
 		return lstSources.size();
 	}
 		void downscaleCloud(const sensor_msgs::PointCloud2ConstPtr scan,
-	 const sensor_msgs::PointCloud2Ptr scan_voxel) const
+	 const sensor_msgs::PointCloud2Ptr scan_voxel, const bool is_laser) const
 	{
 		pcl::PCLPointCloud2* cloud = new pcl::PCLPointCloud2;
+		pcl::PCLPointCloud2ConstPtr cloud_ptr(cloud);
+		pcl_conversions::toPCL(*scan, *cloud);
+		int step = 4;
+
+		const int index_total = scan->height * scan->width;
+		if (scan->height==1) {
+			m_localn.param("step_downscale_laser", step,step);
+		}
+		else{
+			m_localn.param("step_downscale_cloud", step,step);
+		}
+
+		//std::vector<int> indices;
+		pcl::IndicesPtr indices_ptr(new std::vector<int>(index_total / step));
+
+		for (int i = 0; i < index_total / step; i++) 
+		{
+			(*indices_ptr)[i] = i*step;	
+		}
+		pcl::ExtractIndices<pcl::PCLPointCloud2> extract;
+		extract.setInputCloud(cloud_ptr);
+		extract.setIndices(indices_ptr);
+		extract.filter(*cloud);
+
+
+		pcl_conversions::fromPCL(*cloud, *scan_voxel);
+
+		m_tf_listener.waitForTransform(m_frameid_robot, scan->header.frame_id, scan->header.stamp + ros::Duration(0.01), ros::Duration(0.15));
+		pcl_ros::transformPointCloud(m_frameid_robot,*scan_voxel, *scan_voxel, m_tf_listener);
+		
+
+		pcl_conversions::toPCL(*scan_voxel, *cloud);
+		pcl::PassThrough<pcl::PCLPointCloud2> pass;
+
+  		pass.setInputCloud (cloud_ptr);
+  		pass.setFilterFieldName ("z");
+		
+  		pass.setFilterLimits (lim_Z[0],lim_Z[1]);
+		pass.filter (*cloud);
+  		pass.setInputCloud (cloud_ptr);
+  		pass.setFilterFieldName ("x");
+  		pass.setFilterLimits  (lim_X[0],lim_X[1]);
+		pass.filter (*cloud);
+  		pass.setInputCloud (cloud_ptr);
+  		pass.setFilterFieldName ("y");
+  		pass.setFilterLimits  (lim_Y[0],lim_Y[1]);
+		pass.filter (*cloud);
+
+
+
+
+
+		pcl_conversions::fromPCL(*cloud, *scan_voxel);
+		//m_tf_listener.waitForTransform(m_frameid_robot, scan->header.frame_id, scan->header.stamp + ros::Duration(0.01), ros::Duration(0.15));
+		//pcl_ros::transformPointCloud(m_frameid_robot,*scan, *scan_voxel, m_tf_listener);
+		//pcl_conversions::toPCL(*scan_voxel, *cloud);
+		/*pcl::VoxelGrid<pcl::PCLPointCloud2> sor;
+		sor.setInputCloud(cloud_ptr);
+		double x,y,z;
+		m_localn.param("downscaling_leaf_size_x", x,m_leaf_x);
+		m_localn.param("downscaling_leaf_size_y", y,m_leaf_y);
+		m_localn.param("downscaling_leaf_size_z", z,m_leaf_z);
+	
+		sor.setLeafSize(x, y, z);
+		sor.filter(*cloud);
+		
+		pcl::StatisticalOutlierRemoval<pcl::PCLPointCloud2> stat;
+		stat.setInputCloud(cloud_ptr);
+		int K = 1;
+		double sigma = 0;
+		m_localn.param("outlier_removal_n", K,K);
+		m_localn.param("outlier_removal_sigma", sigma,sigma);
+		stat.setMeanK(K);
+		stat.setStddevMulThresh(sigma);
+		stat.filter(*cloud);
+		*/
+		/*pcl::PCLPointCloud2* cloud = new pcl::PCLPointCloud2;
 		pcl::PCLPointCloud2ConstPtr cloud_ptr(cloud);
 		pcl::PCLPointCloud2* cloud_filt = new pcl::PCLPointCloud2;
 		pcl::PCLPointCloud2ConstPtr cloud_ptr_filt(cloud_filt);
@@ -191,29 +271,41 @@ class LocalObstaclesNode
 
 		pcl::VoxelGrid<pcl::PCLPointCloud2> sor;
 		sor.setInputCloud(cloud_ptr);
+		//sor.setMinimumPointsNumberPerVoxel(1000);
+		geometry_msgs::Vector3Stamped vec, vecout;
+		vec.header = scan->header;
+		vec.header.frame_id = m_frameid_reference;
 		double x,y,z;
 		m_localn.param("downscaling_leaf_size_x", x,m_leaf_x);
 		m_localn.param("downscaling_leaf_size_y", y,m_leaf_y);
 		m_localn.param("downscaling_leaf_size_z", z,m_leaf_z);
+		vec.vector.x = x;
+		vec.vector.y = y;
+		vec.vector.z = z;
+		m_tf_listener.transformVector (scan->header.frame_id, vec, vecout); 
+		x = vecout.vector.x;y = vecout.vector.y;z = vecout.vector.z;
+		//sor.setFilterLimits(0.15, 1.85);
 		sor.setLeafSize(x, y, z);
 		sor.filter(*cloud);
 		
 		
-		pcl_conversions::fromPCL(*cloud, *scan_voxel);
+		///pcl_conversions::fromPCL(*cloud, *scan_voxel);
 		//m_tf_listener.lookupTransform(m_frameid_robot, scan->header.frame_id, scan->header.stamp, stf);
 		scan_voxel->header.frame_id = scan->header.frame_id;
 		scan_voxel->header.stamp = scan->header.stamp;
-		pcl_ros::transformPointCloud(m_frameid_robot,*scan_voxel, *scan_voxel, m_tf_listener);
+		//pcl_ros::transformPointCloud(m_frameid_robot,*scan_voxel, *scan_voxel, m_tf_listener);
 		
-		pcl_conversions::toPCL(*scan_voxel, *cloud);
-		/*auto limits = m_limits_down
+		//pcl_conversions::toPCL(*scan_voxel, *cloud);
+		auto limits = m_limits_down
 		.find(scan->header.frame_id)
 		->second;
 		limits.setInputCloud(cloud_ptr);
-    	limits.filter (*cloud);*/
+    	limits.filter (*cloud);
 		pcl::PassThrough<pcl::PCLPointCloud2> pass;
+
   		pass.setInputCloud (cloud_ptr);
   		pass.setFilterFieldName ("z");
+		
   		pass.setFilterLimits (lim_Z[0],lim_Z[1]);
 		pass.filter (*cloud);
   		pass.setInputCloud (cloud_ptr);
@@ -225,16 +317,7 @@ class LocalObstaclesNode
   		pass.setFilterLimits  (lim_Y[0],lim_Y[1]);
 		pass.filter (*cloud);
 		
-		/*
-		pcl::VoxelGrid<pcl::PCLPointCloud2> sor;
-		sor.setInputCloud(cloud_ptr);
-		double x,y,z;
-		m_localn.param("downscaling_leaf_size_x", x,m_leaf_x);
-		m_localn.param("downscaling_leaf_size_y", y,m_leaf_y);
-		m_localn.param("downscaling_leaf_size_z", z,m_leaf_z);
-		sor.setLeafSize(x, y, z);
-		sor.filter(*cloud);*/
-		pcl_conversions::fromPCL(*cloud, *scan_voxel);
+		pcl_conversions::fromPCL(*cloud, *scan_voxel);*/
 
 	}
 
@@ -245,7 +328,7 @@ class LocalObstaclesNode
 		sensor_msgs::PointCloud2Ptr cloud(new sensor_msgs::PointCloud2);
 		proj.projectLaser(*scan,*cloud);
 		//NODELET_INFO("Header laser cloud: %s", cloud->header.frame_id.c_str());
-		downscaleCloud(cloud, scan_voxel);
+		downscaleCloud(cloud, scan_voxel, true);
 	}
 
 	inline void get_limits(const std_msgs::Header& header, const ros::Time& stamp) 
@@ -343,10 +426,10 @@ class LocalObstaclesNode
 			get_limits(scan->header, last_time);
 			sensor_msgs::PointCloud2Ptr scan_voxel(new sensor_msgs::PointCloud2);
 			//pcl_ros::transformPointCloud( m_frameid_robot,sensorOnRobot,*scan, *scan_voxel);
-			downscaleCloud(scan, scan_voxel);
+			downscaleCloud(scan, scan_voxel,false);
 			//pcl_ros::transformPointCloud( m_frameid_reference, tx,*scan_voxel, *scan_voxel);
 			mrpt_bridge::copy(*scan_voxel, *obsPointMap);
-			mrpt_bridge::convert(tx, robotPose);
+			mrpt_bridge::convert(tx , robotPose);
 			ROS_DEBUG(
 				"[onNewSensor_DepthCam] robot pose %s",
 				robotPose.asString().c_str());
